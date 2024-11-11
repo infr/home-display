@@ -132,6 +132,7 @@
         padding: 10px;
       }
     </style>
+    <script src="https://kit.fontawesome.com/ef5c8ce30c.js" crossorigin="anonymous"></script>
   </head>
   <body>
     <div class="container">
@@ -141,17 +142,29 @@
         <div class="car">
           <img src="/330.png" alt="BMW Photo" onclick="drive(this)" />
           <div class="controls">
-            <div class="control-button" onclick="controlBMW('climate', this)">🔥</div>
-            <div class="control-button" onclick="controlBMW('flash', this)">💡</div>
-            <div class="control-button" onclick="controlBMW('lock', this)">🔒</div>
-            <div class="control-button" onclick="controlBMW('unlock', this)">🔓</div>
+            <div class="control-button" onclick="controlBMW('climate', this)">
+              <i class="fas fa-fire-alt"></i>
+            </div>
+            <div class="control-button" onclick="controlBMW('flash', this)">
+              <i class="fas fa-lightbulb"></i>
+            </div>
+            <div class="control-button" onclick="controlBMW('lock', this)">
+              <i class="fas fa-lock"></i>
+            </div>
+            <div class="control-button" onclick="controlBMW('unlock', this)">
+              <i class="fas fa-unlock"></i>
+            </div>
           </div>
         </div>
         <div class="car">
           <img src="/outlander.png" alt="Outlander Photo" onclick="drive(this)" />
           <div class="controls">
-            <div class="control-button" onclick="controlOutlander('remoteHeating', this)">🔥</div>
-            <div class="control-button" onclick="controlOutlander('lights', this)">💡</div>
+            <div class="control-button" onclick="controlOutlander('remoteHeating', this)">
+              <i class="fas fa-fire-alt"></i>
+            </div>
+            <div class="control-button" onclick="controlOutlander('lights', this)">
+              <i class="fas fa-lightbulb"></i>
+            </div>
           </div>
         </div>
       </div>
@@ -176,14 +189,14 @@
         const clockElement = document.getElementById('clock')
         const now = new Date()
 
-        const date = now.toLocaleDateString('Fi-fi', {
+        const date = now.toLocaleDateString('FI-fi', {
           weekday: 'short',
           year: 'numeric',
           month: 'numeric',
           day: 'numeric',
         })
 
-        const time = now.toLocaleTimeString(undefined, {
+        const time = now.toLocaleTimeString('FI-fi', {
           hour: '2-digit',
           minute: '2-digit',
           second: '2-digit',
