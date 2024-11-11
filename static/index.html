@@ -233,34 +233,35 @@
         return vin
       }
 
-      async function controlBMW(command, button) {
-        const vin = await initializeVIN()
-        if (!vin) {
-          console.error('VIN is missing. Unable to proceed with command.')
-          return
-        }
+      function controlBMW(command, button) {
+        initializeVIN().then(vin => {
+          if (!vin) {
+            console.error('VIN is missing. Unable to proceed with command.')
+            return
+          }
 
-        button.classList.add('spin')
+          button.classList.add('spin')
 
-        fetch(`/bmw/${command}/${vin}`, { method: 'POST' })
-          .then(response => response.json())
-          .then(data => {
-            button.classList.remove('spin')
-            if (data.status === 'success') {
-              setButtonState(button, 'success')
-            } else {
+          fetch(`/bmw/${command}/${vin}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+              button.classList.remove('spin')
+              if (data.status === 'success') {
+                setButtonState(button, 'success')
+              } else {
+                setButtonState(button, 'error')
+                document.getElementById('output').innerText = `Command failed: ${JSON.stringify(data, null, 2)}`
+              }
+            })
+            .catch(error => {
+              button.classList.remove('spin')
               setButtonState(button, 'error')
-              document.getElementById('output').innerText = `Command failed: ${JSON.stringify(data, null, 2)}`
-            }
-          })
-          .catch(error => {
-            button.classList.remove('spin')
-            setButtonState(button, 'error')
-            document.getElementById('output').innerText = `Error: ${error.message}`
-          })
+              document.getElementById('output').innerText = `Error: ${error.message}`
+            })
+        })
       }
 
-      async function controlOutlander(command, button) {
+      function controlOutlander(command, button) {
         button.classList.add('spin')
 
         fetch(`/outlander/${command}`, { method: 'POST' })
