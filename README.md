@@ -1,5 +1,12 @@
 <img width="800" alt="home-display" src="https://github.com/user-attachments/assets/bc56c119-a16d-49f6-8c69-045abc7a53a1">
 
+This is part of my home automation system. It runs on a Raspberry Pi with a 7" touch screen display. It shows the electricity price, and you can remotely heat up the cars. Currently BMW works but the Mitsubishi PHEV requires some more work.
+
+# Blog posts
+
+- [Building a home automation system (part 1)](https://kimsalmi.com/posts/2024/home-automation/)
+- [Connecting the cars (part 2)](https://kimsalmi.com/posts/2024/home-automation-2/)  
+
 # Setup
 
 Install [Colin Bendell's BMW package](https://github.com/colinbendell/bmw):
