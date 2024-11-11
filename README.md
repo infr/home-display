@@ -17,7 +17,7 @@ This is part of my home automation system. It runs on a Raspberry Pi with a 7" t
 Install [Colin Bendell's BMW package](https://github.com/colinbendell/bmw):
 
 ```bash
-npm install -g https://github.com/colinbendell/bmw`
+npm install -g https://github.com/colinbendell/bmw
 ```
 
 Set your ConnectedDrive credentials to `~/.bmw`:
