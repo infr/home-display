@@ -289,6 +289,11 @@
         }, 10000)
       }
 
+      // Auto-refresh every hour
+      setTimeout(() => {
+        location.reload();
+      }, 60 * 60 * 1000);
+
       initializeVIN()
       updateClock()
     </script>
