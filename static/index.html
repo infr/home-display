@@ -28,17 +28,14 @@
       .sidebar {
         width: 33.33%;
         background-color: #f4f4f4;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
+        display: block;
       }
 
       .car {
         border-bottom: 1px dashed #ccc;
+        margin-top: 10px;
         width: 100%;
         justify-items: center;
-        padding-bottom: 20px;
       }
 
       .sidebar img {
@@ -48,25 +45,33 @@
 
       .controls {
         display: grid;
-        grid-template-columns: 1fr 1fr; /* Two equal columns */
-        gap: 10px;
-        justify-items: center;
-        align-items: center;
-        width: 40%;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0;
+        justify-items: stretch;
+        align-items: stretch;
+        width: 100%;
       }
 
       .control-button {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        background-color: #5b5b5b;
-        color: white;
-        font-size: 20px;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        border-radius: 0;
+        background-color: transparent;
+        color: #333;
+        font-size: 22px;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
         transition: background-color 0.3s;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border: none;
+      }
+
+      .control-button i {
+        color: #333;
       }
 
       .control-button.success {
@@ -125,11 +130,81 @@
 
       .clock {
         font-family: Arial, sans-serif;
-        font-size: 10px;
+        font-size: 12px;
         font-weight: bold;
         color: #333;
         text-align: center;
         padding: 10px;
+      }
+
+      .weather {
+        width: 100%;
+        padding: 5px;
+        border-radius: 10px;
+        font-size: 12px;
+        color: #222;
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+        justify-content: center;
+        gap: 4px;
+        flex-wrap: nowrap;
+      }
+      .weather-card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+        padding: 4px 4px 2px 4px;
+        min-width: 0;
+        flex: 1 1 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+      }
+      .weather-day {
+        text-align: center;
+        font-size: 11px;
+        color: #555;
+        margin-bottom: 1px;
+      }
+      .weather-icon {
+        font-size: 16px;
+        margin: 1px 0 1px 0;
+        text-align: center;
+      }
+      .weather-temps {
+        text-align: center;
+        font-size: 12px;
+        font-family: monospace;
+        color: #333;
+      }
+      .weather-high {
+        font-weight: bold;
+        color: #d00;
+      }
+      .weather-low {
+        color: #0074d9;
+        margin-left: 2px;
+      }
+
+      .sidebar-section {
+        width: 100%;
+        max-width: none;
+        margin-left: 0;
+        margin-right: 0;
+        flex: none;
+      }
+
+      .sidebar-divider {
+        border: none;
+        border-top: 1.5px dotted #bbb;
+        margin: 16px 0 8px 0;
+        width: 100%;
+        background: none;
+        margin-left: 0;
+        margin-right: 0;
       }
     </style>
     <script src="https://kit.fontawesome.com/ef5c8ce30c.js" crossorigin="anonymous"></script>
@@ -139,8 +214,9 @@
       <!-- Car Control Column (1/3) -->
       <div class="sidebar">
         <div id="clock" class="clock"></div>
-        <div class="car">
-          <img src="/330.png" alt="BMW Photo" onclick="drive(this)" />
+        <div id="weather" class="weather sidebar-section"></div>
+        <div class="car sidebar-section">
+          <img src="330.png" alt="BMW Photo" onclick="drive(this)" />
           <div class="controls">
             <div class="control-button" onclick="controlBMW('climate', this)">
               <i class="fas fa-fire-alt"></i>
@@ -156,8 +232,8 @@
             </div>
           </div>
         </div>
-        <div class="car">
-          <img src="/outlander.png" alt="Outlander Photo" onclick="drive(this)" />
+        <div class="car sidebar-section">
+          <img src="outlander.png" alt="Outlander Photo" onclick="drive(this)" />
           <div class="controls">
             <div class="control-button" onclick="controlOutlander('remoteHeating', this)">
               <i class="fas fa-fire-alt"></i>
@@ -291,11 +367,74 @@
 
       // Auto-refresh every hour
       setTimeout(() => {
-        location.reload();
-      }, 60 * 60 * 1000);
+        location.reload()
+      }, 60 * 60 * 1000)
+
+      // Weather configuration
+      const WEATHER_LATITUDE = 60.2701
+      const WEATHER_LONGITUDE = 24.7976
+      const WEATHER_TIMEZONE = 'Europe/Helsinki'
+
+      async function fetchWeather() {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${WEATHER_LATITUDE}&longitude=${WEATHER_LONGITUDE}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=${encodeURIComponent(
+          WEATHER_TIMEZONE
+        )}&current_weather=true`
+        try {
+          const response = await fetch(url)
+          const data = await response.json()
+          if (!data.daily) return
+          const days = data.daily
+          const weatherCodes = days.weathercode
+          const tempsMax = days.temperature_2m_max
+          const tempsMin = days.temperature_2m_min
+          const dates = days.time
+
+          const icons = weatherCodes.map(code => weatherIcon(code))
+          const dayNames = dates.map((d, i) =>
+            i === 0 ? 'Today' : new Date(d).toLocaleDateString('en-US', { weekday: 'short' })
+          )
+
+          let html = ''
+          if (data.current_weather && typeof data.current_weather.temperature === 'number') {
+            html += `<div class="weather-card">
+              <div class="weather-day">Now</div>
+              <div class="weather-icon">${weatherIcon(data.current_weather.weathercode)}</div>
+              <div class="weather-temps">
+                <span class="weather-high">${Math.round(data.current_weather.temperature)}°</span>
+              </div>
+            </div>`
+          }
+          for (let i = 0; i < 3; i++) {
+            html += `<div class="weather-card">
+              <div class="weather-day">${dayNames[i]}</div>
+              <div class="weather-icon">${icons[i]}</div>
+              <div class="weather-temps">
+                <span class="weather-high">${Math.round(tempsMax[i])}°</span>/<span class="weather-low">${Math.round(
+              tempsMin[i]
+            )}°</span>
+              </div>
+            </div>`
+          }
+          document.getElementById('weather').innerHTML = html
+        } catch (e) {
+          document.getElementById('weather').innerHTML = '<span style="color:#a00">Weather unavailable</span>'
+        }
+      }
+
+      // Open-Meteo weather codes: https://open-meteo.com/en/docs#api_form
+      function weatherIcon(code) {
+        if ([0].includes(code)) return '☀️' // Clear
+        if ([1, 2, 3].includes(code)) return '⛅' // Mainly clear/partly cloudy
+        if ([45, 48].includes(code)) return '🌫️' // Fog
+        if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return '🌧️' // Rain
+        if ([71, 73, 75, 77, 85, 86].includes(code)) return '❄️' // Snow
+        if ([95, 96, 99].includes(code)) return '⛈️' // Thunder
+        return '☁️' // Default: Cloudy
+      }
 
       initializeVIN()
       updateClock()
+      fetchWeather()
     </script>
   </body>
 </html>
