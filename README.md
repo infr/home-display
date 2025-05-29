@@ -4,7 +4,7 @@ This is part of my home automation system. It runs on a Raspberry Pi with a 7" t
 
 ---
 
-<img width="800" alt="home-display" src="https://github.com/user-attachments/assets/bc56c119-a16d-49f6-8c69-045abc7a53a1">
+<img width="800" alt="home-display" src="https://github.com/user-attachments/assets/3f65a19d-eb60-4969-888b-ba053e8d12b6" />
 
 
 # Blog posts
