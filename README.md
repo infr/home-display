@@ -1,6 +1,6 @@
 # Home automation display
 
-This is part of my home automation system. It runs on a Raspberry Pi with a 7" touchscreen display. It shows the electricity price, and you can remotely heat up the cars. Currently, BMW works but the Mitsubishi PHEV requires some more work.
+This is part of my home automation system. It runs on a Raspberry Pi with a 7" touchscreen display (800x480). It shows the electricity price, and you can remotely heat up the cars. Currently, BMW works but the Mitsubishi PHEV requires some more work.
 
 ---
 
@@ -27,7 +27,6 @@ email=email@example.com
 password=password
 geo=row
 ```
-
 
 Install fastapi and uvicorn:
 
