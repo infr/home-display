@@ -17,6 +17,8 @@
         width: 100%;
         display: flex;
         font-family: Arial, sans-serif;
+        background: #23272b;
+        color: #fff;
       }
 
       .container {
@@ -27,20 +29,31 @@
 
       .sidebar {
         width: 33.33%;
-        background-color: #f4f4f4;
+        background: #23272b;
+        border-radius: 8px;
         display: block;
       }
 
       .car {
-        border-bottom: 1px dashed #ccc;
-        margin-top: 10px;
+        margin-top: 18px;
         width: 100%;
-        justify-items: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: none;
+        border-radius: 0;
+        box-shadow: none;
+        padding: 0 0 10px 0;
+      }
+
+      .car:last-child {
+        border-bottom: none;
       }
 
       .sidebar img {
         max-width: 150px;
-        border-radius: 10px;
+        border-radius: 8px;
+        display: block;
       }
 
       .controls {
@@ -55,23 +68,29 @@
       .control-button {
         width: 100%;
         aspect-ratio: 1 / 1;
-        border-radius: 0;
-        background-color: transparent;
-        color: #333;
+        border-radius: 8px;
+        background-color: #23272b;
+        color: #fff;
         font-size: 22px;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: background-color 0.3s;
+        transition: background 0.2s, color 0.2s;
         margin: 0;
         padding: 0;
         box-shadow: none;
-        border: none;
+        border: 1.5px solid #444;
+      }
+      .control-button:hover,
+      .control-button:active {
+        background: #1c69d4;
+        color: #fff;
+        border-color: #1c69d4;
       }
 
       .control-button i {
-        color: #333;
+        color: #fff;
       }
 
       .control-button.success {
@@ -125,36 +144,52 @@
       .iframe-container {
         width: 66.66%;
         border: none;
-        background-color: white;
+        background-color: #23272b;
+        border-radius: 8px;
+        box-shadow: none;
+        margin-left: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #electricityChart {
+        width: 100%;
+        height: 100%;
       }
 
       .clock {
         font-family: Arial, sans-serif;
-        font-size: 12px;
+        font-size: 22px;
         font-weight: bold;
-        color: #333;
+        color: #fff;
         text-align: center;
-        padding: 10px;
+        padding: 12px;
       }
 
       .weather {
-        width: 100%;
         padding: 5px;
         border-radius: 10px;
         font-size: 12px;
-        color: #222;
+        color: #fff;
         display: flex;
         flex-direction: row;
         align-items: stretch;
         justify-content: center;
         gap: 4px;
         flex-wrap: nowrap;
+        background: #23272b;
+        box-shadow: none;
+        margin-bottom: 10px;
+        border: none;
       }
       .weather-card {
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+        background: #ffffff;
+        color: #000;
+        border-radius: 6px;
+        box-shadow: none;
         padding: 4px 4px 2px 4px;
+        border: none;
         min-width: 0;
         flex: 1 1 0;
         display: flex;
@@ -166,8 +201,9 @@
       .weather-day {
         text-align: center;
         font-size: 11px;
-        color: #555;
+        color: #666;
         margin-bottom: 1px;
+        font-weight: bold;
       }
       .weather-icon {
         font-size: 16px;
@@ -178,14 +214,14 @@
         text-align: center;
         font-size: 12px;
         font-family: monospace;
-        color: #333;
+        color: #000;
       }
       .weather-high {
         font-weight: bold;
-        color: #d00;
+        color: #000;
       }
       .weather-low {
-        color: #0074d9;
+        color: #666;
         margin-left: 2px;
       }
 
@@ -233,8 +269,11 @@
       </div>
 
       <!-- External Content Column (2/3) -->
-      <iframe class="iframe-container" src="https://spottihinta.fi/linkki/v2/6/38/0/10/20/1/0/D/1/0/1/1/1"></iframe>
+      <div class="iframe-container" id="electricity-container">
+        <canvas id="electricityChart"></canvas>
+      </div>
     </div>
+    <script src="electricity.js"></script>
 
     <script>
       function spinit(element) {
