@@ -81,7 +81,7 @@ function renderElectricityChart() {
   canvas.width = container.clientWidth
   canvas.height = container.clientHeight
 
-  const ctx = canvas.getContext('2d')
+  const ctx = canvas.getContext('2d', { willReadFrequently: true })
 
   // Clear canvas
   ctx.fillStyle = ELECTRICITY_CONFIG.colors.background

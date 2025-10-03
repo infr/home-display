@@ -32,6 +32,8 @@
         background: #23272b;
         border-radius: 8px;
         display: block;
+        transition: background 0.5s ease;
+        position: relative;
       }
 
       .car {
@@ -54,6 +56,7 @@
         max-width: 150px;
         border-radius: 8px;
         display: block;
+        transform-origin: center center;
       }
 
       .controls {
@@ -140,6 +143,7 @@
       .drive {
         animation: drive 5s ease-in-out;
       }
+
 
       .iframe-container {
         width: 66.66%;
@@ -260,7 +264,7 @@
           </div>
         </div>
         <div class="car sidebar-section">
-          <img src="outlander.png" alt="Outlander Photo" onclick="drive(this)" />
+          <img src="outlander.png" alt="Outlander Photo" onclick="driveToChart(this)" />
           <div class="controls">
             <div class="control-button" onclick="controlOutlander('remoteHeating', this)">🔥</div>
             <div class="control-button" onclick="controlOutlander('lights', this)">💡</div>
@@ -285,6 +289,194 @@
         element.classList.remove('drive')
         void element.offsetWidth
         element.classList.add('drive')
+      }
+
+      let isAnimatingChart = false
+
+      function driveToChart(element) {
+        if (isAnimatingChart) return
+
+        const canvas = document.getElementById('electricityChart')
+        if (!canvas || typeof priceData === 'undefined' || !priceData.length) {
+          drive(element)
+          return
+        }
+
+        isAnimatingChart = true
+
+        const chartRect = canvas.getBoundingClientRect()
+        const carRect = element.getBoundingClientRect()
+
+        const paddingLeft = 70
+        const paddingRight = 20
+        const paddingTop = 50
+        const paddingBottom = 70
+
+        // Use full canvas width, car can go beyond visible area
+        const chartAreaLeft = chartRect.left
+        const chartAreaRight = chartRect.right
+
+        const duration = 12000
+        const startTime = Date.now()
+
+        // Get the data to display (same logic as in electricity.js)
+        const now = new Date()
+        let dataToShow = priceData.filter(price => {
+          const priceDate = new Date(price.date)
+          return priceDate >= now && priceDate < new Date(now.getTime() + 24 * 60 * 60 * 1000)
+        }).slice(0, 96)
+
+        const minPrice = 0
+        const maxPrice = 30
+        const yHistory = []
+        const rotationHistory = []
+
+        // Calculate first bar position for initial drive
+        const firstPriceValue = dataToShow[0]?.value || 15
+        const chartHeightPx = canvas.height - paddingTop - paddingBottom
+        let firstNormalizedHeight
+        if (firstPriceValue < 0) {
+          firstNormalizedHeight = 0
+        } else if (firstPriceValue > maxPrice) {
+          firstNormalizedHeight = 1
+        } else {
+          firstNormalizedHeight = firstPriceValue / maxPrice
+        }
+        const firstBarTopCanvas = paddingTop + chartHeightPx * (1 - firstNormalizedHeight)
+        const firstBarScreenY = chartRect.top + (firstBarTopCanvas / canvas.height) * chartRect.height - element.offsetHeight
+
+        function animate() {
+          const elapsed = Date.now() - startTime
+          let progress = Math.min(elapsed / duration, 1)
+
+          // Phase 1 (0-15%): Drive to start of chart
+          // Phase 2 (15-85%): Drive across chart
+          // Phase 3 (85-100%): Return home
+          let xProgress, phase, direction = 1
+          if (progress < 0.15) {
+            phase = 'toStart'
+            xProgress = 0
+            direction = 1
+          } else if (progress < 0.85) {
+            phase = 'onChart'
+            const chartProgress = (progress - 0.15) / 0.7
+            if (chartProgress < 0.5) {
+              xProgress = chartProgress * 2
+              direction = 1
+            } else {
+              xProgress = 2 - chartProgress * 2
+              direction = -1
+            }
+          } else {
+            phase = 'returning'
+            xProgress = 0
+            direction = 1
+          }
+
+          let translateX, translateY, rotation = 0
+
+          if (phase === 'toStart') {
+            // Drive from original position to start of chart
+            const phaseProgress = progress / 0.15
+            const targetX = chartAreaLeft
+            translateX = (targetX - carRect.left) * phaseProgress
+            translateY = (firstBarScreenY - carRect.top) * phaseProgress
+
+            // Calculate rotation based on the slope to first bar
+            const deltaY = firstBarScreenY - carRect.top
+            const deltaX = chartAreaLeft - carRect.left
+            const targetRotation = Math.atan2(deltaY, deltaX * 0.5) * (180 / Math.PI)
+            const clampedRotation = Math.max(-80, Math.min(80, targetRotation))
+
+            // Gradually increase rotation from 0 to target as we progress
+            const currentRotation = clampedRotation * phaseProgress
+
+            // Smooth rotation on the way to first bar
+            rotationHistory.push(currentRotation)
+            if (rotationHistory.length > 20) rotationHistory.shift()
+            rotation = rotationHistory.reduce((a, b) => a + b, 0) / rotationHistory.length
+          } else if (phase === 'onChart') {
+            // On chart - follow the data
+            const chartWidth = chartAreaRight - chartAreaLeft - element.offsetWidth
+            const currentX = chartAreaLeft + chartWidth * xProgress
+
+            // Map xProgress to data index and sample surrounding data for smoothing
+            const exactIndex = xProgress * (dataToShow.length - 1)
+            const startIndex = Math.max(0, Math.floor(exactIndex) - 5)
+            const endIndex = Math.min(dataToShow.length - 1, Math.ceil(exactIndex) + 5)
+
+            // Get average price around current position for smoothing
+            let priceSum = 0
+            let priceCount = 0
+            for (let i = startIndex; i <= endIndex; i++) {
+              priceSum += dataToShow[i]?.value || 15
+              priceCount++
+            }
+            const priceValue = priceSum / priceCount
+
+            // Calculate Y position based on price
+            let normalizedHeight
+            if (priceValue < 0) {
+              normalizedHeight = 0
+            } else if (priceValue > maxPrice) {
+              normalizedHeight = 1
+            } else {
+              normalizedHeight = priceValue / maxPrice
+            }
+
+            const barTopCanvas = paddingTop + chartHeightPx * (1 - normalizedHeight)
+
+            // Smooth the Y position
+            yHistory.push(barTopCanvas)
+            if (yHistory.length > 25) yHistory.shift()
+            const smoothY = yHistory.reduce((a, b) => a + b, 0) / yHistory.length
+
+            // Calculate rotation based on Y change
+            if (yHistory.length >= 15) {
+              const recent = yHistory.slice(-15)
+              const yChange = recent[recent.length - 1] - recent[0]
+              // Positive yChange means going down (higher Y), negative means going up
+              // When going backwards (direction = -1), invert the rotation
+              rotation = Math.atan2(yChange * direction, 20) * (180 / Math.PI)
+              rotation = Math.max(-80, Math.min(80, rotation))
+            }
+
+            // Smooth rotation
+            rotationHistory.push(rotation)
+            if (rotationHistory.length > 20) rotationHistory.shift()
+            rotation = rotationHistory.reduce((a, b) => a + b, 0) / rotationHistory.length
+
+            // Convert canvas Y to screen Y
+            const targetScreenY = chartRect.top + (smoothY / canvas.height) * chartRect.height - element.offsetHeight
+
+            translateX = currentX - carRect.left
+            translateY = targetScreenY - carRect.top
+          } else {
+            // Returning home - interpolate back
+            const returnProgress = (progress - 0.85) / 0.15
+            const lastX = chartAreaLeft - carRect.left
+            const lastY = firstBarScreenY - carRect.top
+            translateX = lastX * (1 - returnProgress)
+            translateY = lastY * (1 - returnProgress)
+
+            // Smoothly return rotation to 0
+            const targetRotation = 0
+            rotationHistory.push(targetRotation)
+            if (rotationHistory.length > 20) rotationHistory.shift()
+            rotation = rotationHistory.reduce((a, b) => a + b, 0) / rotationHistory.length
+          }
+
+          element.style.transform = `translate(${translateX}px, ${translateY}px) rotate(${rotation}deg)`
+
+          if (progress < 1) {
+            requestAnimationFrame(animate)
+          } else {
+            element.style.transform = ''
+            isAnimatingChart = false
+          }
+        }
+
+        animate()
       }
 
       function updateClock() {
