@@ -84,6 +84,8 @@ async function fetchElectricityPrices() {
   } catch (error) {
     console.error('Error fetching electricity prices:', error)
     showError('Unable to load electricity prices')
+    const output = document.getElementById('output')
+    if (output) output.value += `[Electricity] Fetch error: ${error.message}\n`
   }
 }
 

@@ -1213,6 +1213,8 @@
           document.getElementById('weather').innerHTML = html
         } catch (e) {
           document.getElementById('weather').innerHTML = '<span style="color:#a00">Weather unavailable</span>'
+          const output = document.getElementById('output')
+          if (output) output.value += `[Weather] Fetch error: ${e.message}\n`
         }
       }
 
