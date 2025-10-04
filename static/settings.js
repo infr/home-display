@@ -61,10 +61,24 @@ function clearDebugLogs() {
   }
 }
 
+function updateCarStatusInterval() {
+  const interval = parseInt(document.getElementById('carStatusInterval').value)
+  localStorage.setItem('carStatusInterval', interval)
+  alert('Car status interval updated. Please reload the page for changes to take effect.')
+}
+
+function updateWeatherInterval() {
+  const interval = parseInt(document.getElementById('weatherInterval').value)
+  localStorage.setItem('weatherInterval', interval)
+  alert('Weather interval updated. Please reload the page for changes to take effect.')
+}
+
 function resetSettings() {
   if (confirm('Reset all settings to defaults?')) {
     localStorage.removeItem('themeMode')
     localStorage.removeItem('maxValue')
+    localStorage.removeItem('carStatusInterval')
+    localStorage.removeItem('weatherInterval')
     localStorage.removeItem('testMode')
     localStorage.removeItem('bmw_vin')
     location.reload()
@@ -99,10 +113,14 @@ function applyTheme(isDark) {
 function loadSettings() {
   const themeMode = localStorage.getItem('themeMode') || 'auto'
   const maxValue = parseInt(localStorage.getItem('maxValue')) || 30
+  const carStatusInterval = parseInt(localStorage.getItem('carStatusInterval')) || 5
+  const weatherInterval = parseInt(localStorage.getItem('weatherInterval')) || 15
   const testMode = localStorage.getItem('testMode') === 'true'
 
   document.getElementById('darkModeSelect').value = themeMode
   document.getElementById('maxValue').value = maxValue
+  document.getElementById('carStatusInterval').value = carStatusInterval
+  document.getElementById('weatherInterval').value = weatherInterval
   document.getElementById('testModeToggle').checked = testMode
 
   // Apply theme based on mode

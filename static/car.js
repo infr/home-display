@@ -438,6 +438,99 @@ function controlBMW(command, button) {
   })
 }
 
+// Mitsubishi Outlander control functions
+async function updateMitsubishiStatus() {
+  const testMode = localStorage.getItem('testMode') === 'true'
+
+  let batteryLevel, range, isCharging, hasConnection
+
+  if (testMode) {
+    hasConnection = Math.random() > 0.1
+    if (hasConnection) {
+      batteryLevel = Math.floor(Math.random() * 100)
+      range = Math.floor(Math.random() * 50) + 10 // 10-60 km
+      isCharging = batteryLevel < 80 && Math.random() > 0.6
+    }
+    addDebugLog(`GET /mitsubishi/status: TEST MODE`)
+  } else {
+    try {
+      const response = await fetch('/mitsubishi/status')
+
+      if (!response.ok) {
+        hasConnection = false
+        addDebugLog(`GET /mitsubishi/status: ${response.status} - FAILED`)
+        throw new Error(`HTTP ${response.status}: Server error`)
+      }
+
+      const data = await response.json()
+      addDebugLog(`GET /mitsubishi/status: ${response.status} - OK`)
+
+      hasConnection = true
+
+      // Parse battery level from "battery" field
+      const batteryMatch = data.battery?.match(/(\d+)/)
+      batteryLevel = batteryMatch ? parseInt(batteryMatch[1]) : 0
+
+      // Parse charging status
+      isCharging = /charging|yes/i.test(data.chargestatus || '')
+
+      // Estimate range (Outlander PHEV has ~50km electric range)
+      range = Math.round((batteryLevel / 100) * 50)
+
+    } catch (error) {
+      console.error('Error fetching Mitsubishi status:', error)
+      addDebugLog(`GET /mitsubishi/status: ERROR - ${error.message}`)
+      hasConnection = false
+    }
+  }
+
+  // Update connection status
+  const connectionStatus = document.getElementById('mitsubishiConnection')
+  const statusInfo = document.getElementById('mitsubishiStatusInfo')
+
+  if (!hasConnection) {
+    connectionStatus.classList.remove('disconnected')
+    connectionStatus.classList.add('error')
+    statusInfo.style.display = 'none'
+    return
+  }
+
+  connectionStatus.classList.remove('disconnected', 'error')
+  statusInfo.style.display = 'flex'
+
+  // Update battery bars
+  const batteryBars = document.querySelectorAll('#mitsubishiBattery .battery-bar')
+  const activeBars = Math.ceil((batteryLevel / 100) * 6)
+  batteryBars.forEach((bar, index) => {
+    bar.classList.remove('active', 'low', 'medium', 'high')
+    if (index < activeBars) {
+      bar.classList.add('active')
+      if (batteryLevel <= 33) {
+        bar.classList.add('low')
+      } else if (batteryLevel <= 66) {
+        bar.classList.add('medium')
+      } else {
+        bar.classList.add('high')
+      }
+    }
+  })
+
+  // Update charging icon
+  const chargingIcon = document.getElementById('mitsubishiCharging')
+  chargingIcon.classList.remove('charging')
+  if (isCharging) {
+    chargingIcon.textContent = '⚡ Charging'
+    chargingIcon.classList.add('charging')
+  } else if (batteryLevel >= 90) {
+    chargingIcon.textContent = '✓ Charged'
+  } else {
+    chargingIcon.textContent = '🔌 Not plugged'
+  }
+
+  // Update range
+  document.getElementById('mitsubishiRange').textContent = `${range} km`
+}
+
 function controlOutlander(command, button) {
   button.classList.add('spin')
 
@@ -468,13 +561,21 @@ function setButtonState(button, state) {
   }, 10000)
 }
 
-// Initialize BMW status on load and update every 5 minutes
+// Initialize BMW and Mitsubishi status on load and update every 5 minutes (default, configurable in settings)
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     updateBMWStatus()
-    setInterval(updateBMWStatus, 5 * 60 * 1000)
+    updateMitsubishiStatus()
+    setInterval(() => {
+      updateBMWStatus()
+      updateMitsubishiStatus()
+    }, (parseInt(localStorage.getItem('carStatusInterval')) || 5) * 60 * 1000)
   })
 } else {
   updateBMWStatus()
-  setInterval(updateBMWStatus, 5 * 60 * 1000)
+  updateMitsubishiStatus()
+  setInterval(() => {
+    updateBMWStatus()
+    updateMitsubishiStatus()
+  }, (parseInt(localStorage.getItem('carStatusInterval')) || 5) * 60 * 1000)
 }

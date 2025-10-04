@@ -96,9 +96,18 @@ if (document.readyState === 'loading') {
     updateClock()
     setInterval(updateClock, 1000)
     fetchWeather()
+    // Refresh weather every 15 minutes (default, configurable in settings)
+    setInterval(() => {
+      const weatherInterval = parseInt(localStorage.getItem('weatherInterval')) || 15
+      fetchWeather()
+    }, (parseInt(localStorage.getItem('weatherInterval')) || 15) * 60 * 1000)
   })
 } else {
   updateClock()
   setInterval(updateClock, 1000)
   fetchWeather()
+  // Refresh weather every 15 minutes (default, configurable in settings)
+  setInterval(() => {
+    fetchWeather()
+  }, (parseInt(localStorage.getItem('weatherInterval')) || 15) * 60 * 1000)
 }

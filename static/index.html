@@ -39,7 +39,24 @@
           </div>
         </div>
         <div class="car sidebar-section">
-          <img src="outlander.png" alt="Outlander Photo" onclick="driveToChart(this)" />
+          <div class="car-with-range">
+            <div class="car-left-info">
+              <div class="connection-status disconnected" id="mitsubishiConnection"></div>
+              <div id="mitsubishiStatusInfo" style="display: none;">
+                <div class="battery-bars" id="mitsubishiBattery">
+                  <div class="battery-bar"></div>
+                  <div class="battery-bar"></div>
+                  <div class="battery-bar"></div>
+                  <div class="battery-bar"></div>
+                  <div class="battery-bar"></div>
+                  <div class="battery-bar"></div>
+                </div>
+                <div class="charging-icon" id="mitsubishiCharging">🔌</div>
+                <div class="range-display" id="mitsubishiRange">-- km</div>
+              </div>
+            </div>
+            <img src="outlander.png" alt="Outlander Photo" onclick="driveToChart(this)" />
+          </div>
           <div class="controls">
             <div class="control-button" onclick="controlOutlander('remoteHeating', this)">🔥</div>
             <div class="control-button" onclick="controlOutlander('lights', this)">💡</div>
@@ -77,6 +94,14 @@
             <div class="setting-item">
               <label for="maxValue">Max Price Value (c/kWh)</label>
               <input type="number" id="maxValue" value="30" min="10" max="100" onchange="updateMaxValue()">
+            </div>
+            <div class="setting-item">
+              <label for="carStatusInterval">Car Status Update (minutes)</label>
+              <input type="number" id="carStatusInterval" value="5" min="1" max="60" onchange="updateCarStatusInterval()">
+            </div>
+            <div class="setting-item">
+              <label for="weatherInterval">Weather Update (minutes)</label>
+              <input type="number" id="weatherInterval" value="15" min="5" max="120" onchange="updateWeatherInterval()">
             </div>
             <div class="setting-item">
               <label class="toggle">
