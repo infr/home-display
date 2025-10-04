@@ -268,11 +268,11 @@
       }
 
       .modal-column {
-        flex: 1;
+        flex: 0 0 33%;
       }
 
       .modal-column.logs {
-        flex: 1.2;
+        flex: 1;
       }
 
       .setting-item {
@@ -284,6 +284,7 @@
         margin-bottom: 8px;
         color: var(--text-color);
         font-weight: bold;
+        font-size: 13px;
       }
 
       .setting-item input[type="number"],
@@ -574,8 +575,7 @@
           </div>
           <div class="modal-column logs">
             <div class="setting-item">
-              <label for="output">Debug Log (last 10 entries)</label>
-              <textarea id="output" readonly rows="12"></textarea>
+              <textarea id="output" readonly rows="15" placeholder="Debug logs (last 10 entries)"></textarea>
               <button onclick="clearDebugLogs()" style="margin-top: 8px; padding: 8px 16px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-color); cursor: pointer;">Clear Log</button>
             </div>
           </div>
