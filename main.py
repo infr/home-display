@@ -70,6 +70,39 @@ async def list_vehicles():
     result = execute_command(["bmw", "list"])
     print(f"Result from list command: {result}")
     return result
+    
+@app.get("/mitsubishi/status")
+def mitsubishi_status():
+    return {
+        "battery": subprocess.check_output(["phevctl", "battery"], text=True),
+        "chargestatus": subprocess.check_output(["phevctl", "chargestatus"], text=True),
+        "lockstatus": subprocess.check_output(["phevctl", "lockstatus"], text=True),
+        "hvac": subprocess.check_output(["phevctl", "hvac"], text=True),
+    }
+
+@app.get("/mitsubishi/battery")
+def mitsubishi_battery():
+    return subprocess.check_output(["phevctl", "battery"], text=True)
+
+@app.get("/mitsubishi/chargestatus")
+def mitsubishi_chargestatus():
+    return subprocess.check_output(["phevctl", "chargestatus"], text=True)
+
+@app.get("/mitsubishi/lockstatus")
+def mitsubishi_lockstatus():
+    return subprocess.check_output(["phevctl", "lockstatus"], text=True)
+
+@app.get("/mitsubishi/hvac")
+def mitsubishi_hvac():
+    return subprocess.check_output(["phevctl", "hvac"], text=True)
+
+@app.post("/mitsubishi/aircon/{state}")
+def mitsubishi_aircon(state: str):
+    return subprocess.check_output(["phevctl", "aircon", state], text=True)
+
+@app.post("/mitsubishi/acmode/{mode}/{minutes}")
+def mitsubishi_acmode(mode: str, minutes: int):
+    return subprocess.check_output(["phevctl", "acmode", mode, str(minutes)], text=True)
 
 # Mount static files after API routes
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
