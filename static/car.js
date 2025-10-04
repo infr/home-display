@@ -58,7 +58,8 @@ function driveToChart(element) {
     let sum = 0
     let count = 0
     for (let j = startIdx; j <= endIdx; j++) {
-      sum += dataToShow[j]?.value || 15
+      const value = dataToShow[j]?.value
+      sum += value !== undefined ? value : 15
       count++
     }
     smoothedPrices.push(sum / count)
