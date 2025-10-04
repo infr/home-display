@@ -185,6 +185,12 @@ function driveToChart(element) {
       }
       const smoothY = ySum / yHistory.length
 
+      // Debug logging for price transitions (indices 125-135)
+      if (dataIndex >= 125 && dataIndex <= 135) {
+        const rawValue = dataToShow[dataIndex]?.value
+        console.log(`[Car Animation] idx=${dataIndex}, raw=${rawValue?.toFixed(4)}, smoothed=${priceValue.toFixed(4)}, effective=${effectivePrice.toFixed(4)}, barTop=${barTopCanvas.toFixed(2)}, smoothY=${smoothY.toFixed(2)}, yHistory.len=${yHistory.length}`)
+      }
+
       // Calculate rotation based on Y change
       if (yHistory.length >= 10) {
         const yChange = yHistory[yHistory.length - 1] - yHistory[yHistory.length - 10]
