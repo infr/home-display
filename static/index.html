@@ -554,8 +554,9 @@
           </label>
         </div>
         <div class="setting-item">
-          <label for="output">Debug Log</label>
+          <label for="output">Debug Log (last 10 entries)</label>
           <textarea id="output" readonly rows="8"></textarea>
+          <button onclick="clearDebugLogs()" style="margin-top: 8px; padding: 8px 16px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-color); cursor: pointer;">Clear Log</button>
         </div>
       </div>
     </div>
@@ -798,6 +799,67 @@
         animate()
       }
 
+      // Debug logging to localStorage
+      function addDebugLog(message) {
+        const timestamp = new Date().toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+        const logEntry = `[${timestamp}] ${message}`
+
+        // Get existing logs from localStorage
+        let logs = []
+        try {
+          const stored = localStorage.getItem('debugLogs')
+          if (stored) {
+            logs = JSON.parse(stored)
+          }
+        } catch (e) {
+          console.error('Error reading debug logs:', e)
+        }
+
+        // Add new log
+        logs.push(logEntry)
+
+        // Keep only last 10 logs
+        if (logs.length > 10) {
+          logs = logs.slice(-10)
+        }
+
+        // Save back to localStorage
+        try {
+          localStorage.setItem('debugLogs', JSON.stringify(logs))
+        } catch (e) {
+          console.error('Error saving debug logs:', e)
+        }
+
+        // Update textarea if it exists
+        const output = document.getElementById('output')
+        if (output) {
+          output.value = logs.join('\n')
+        }
+      }
+
+      function loadDebugLogs() {
+        try {
+          const stored = localStorage.getItem('debugLogs')
+          if (stored) {
+            const logs = JSON.parse(stored)
+            const output = document.getElementById('output')
+            if (output) {
+              output.value = logs.join('\n')
+            }
+          }
+        } catch (e) {
+          console.error('Error loading debug logs:', e)
+        }
+      }
+
+      function clearDebugLogs() {
+        localStorage.removeItem('debugLogs')
+        const output = document.getElementById('output')
+        if (output) {
+          output.value = ''
+        }
+      }
+
       // Settings management
       function isAutoDarkMode() {
         const now = new Date()
@@ -864,6 +926,7 @@
 
       function openSettings() {
         document.getElementById('settingsModal').style.display = 'block'
+        loadDebugLogs()
       }
 
       function closeSettings() {
@@ -972,8 +1035,7 @@
             }
           } catch (error) {
             console.error('Error fetching VIN:', error)
-            const output = document.getElementById('output')
-            if (output) output.value += `[BMW] VIN fetch error: ${error.message}\n`
+            addDebugLog(`[BMW] VIN fetch error: ${error.message}`)
           }
         }
         return vin
@@ -1027,8 +1089,7 @@
               }
             } catch (error) {
               console.error('Error fetching BMW status:', error)
-              const output = document.getElementById('output')
-              if (output) output.value += `[BMW] Status fetch error: ${error.message}\n`
+              addDebugLog(`[BMW] Status fetch error: ${error.message}`)
               hasConnection = false
             }
           }
@@ -1117,15 +1178,13 @@
                 }
               } else {
                 setButtonState(button, 'error')
-                const output = document.getElementById('output')
-                if (output) output.value += `[BMW] Command failed: ${JSON.stringify(data, null, 2)}\n`
+                addDebugLog(`[BMW] Command failed: ${JSON.stringify(data, null, 2)}`)
               }
             })
             .catch(error => {
               button.classList.remove('spin')
               setButtonState(button, 'error')
-              const output = document.getElementById('output')
-              if (output) output.value += `[BMW] Error: ${error.message}\n`
+              addDebugLog(`[BMW] Error: ${error.message}`)
             })
         })
       }
@@ -1141,15 +1200,13 @@
               setButtonState(button, 'success')
             } else {
               setButtonState(button, 'error')
-              const output = document.getElementById('output')
-              if (output) output.value += `[Outlander] Command failed: ${JSON.stringify(data, null, 2)}\n`
+              addDebugLog(`[Outlander] Command failed: ${JSON.stringify(data, null, 2)}`)
             }
           })
           .catch(error => {
             button.classList.remove('spin')
             setButtonState(button, 'error')
-            const output = document.getElementById('output')
-            if (output) output.value += `[Outlander] Error: ${error.message}\n`
+            addDebugLog(`[Outlander] Error: ${error.message}`)
           })
       }
 
@@ -1213,8 +1270,7 @@
           document.getElementById('weather').innerHTML = html
         } catch (e) {
           document.getElementById('weather').innerHTML = '<span style="color:#a00">Weather unavailable</span>'
-          const output = document.getElementById('output')
-          if (output) output.value += `[Weather] Fetch error: ${e.message}\n`
+          addDebugLog(`[Weather] Fetch error: ${e.message}`)
         }
       }
 
