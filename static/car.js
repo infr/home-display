@@ -408,46 +408,49 @@ async function updateBMWStatus() {
   }
 
   // Update connection status
-  const connectionStatus = document.getElementById('bmwConnection')
+  const connectionBadge = document.getElementById('bmwConnection')
   const statusInfo = document.getElementById('bmwStatusInfo')
+  const connectionText = connectionBadge.querySelector('.connection-text')
+  const infoPanel = document.getElementById('bmwPanel')
 
   if (!hasConnection) {
-    connectionStatus.classList.remove('disconnected')
-    connectionStatus.classList.add('error')
+    connectionBadge.classList.add('disconnected')
+    connectionBadge.classList.remove('error')
+    connectionText.textContent = 'Offline'
     statusInfo.style.display = 'none'
+    infoPanel.classList.add('offline')
     return
   }
 
-  connectionStatus.classList.remove('disconnected', 'error')
-  statusInfo.style.display = 'flex'
+  connectionBadge.classList.remove('disconnected', 'error')
+  connectionText.textContent = 'Online'
+  statusInfo.style.display = 'block'
+  infoPanel.classList.remove('offline')
 
-  // Update battery bars
-  const batteryBars = document.querySelectorAll('#bmwBattery .battery-bar')
-  const activeBars = Math.ceil((batteryLevel / 100) * 6)
-  batteryBars.forEach((bar, index) => {
-    bar.classList.remove('active', 'low', 'medium', 'high')
-    if (index < activeBars) {
-      bar.classList.add('active')
-      if (batteryLevel <= 33) {
-        bar.classList.add('low')
-      } else if (batteryLevel <= 66) {
-        bar.classList.add('medium')
-      } else {
-        bar.classList.add('high')
-      }
-    }
-  })
+  // Update battery level
+  const batteryLevel_elem = document.getElementById('bmwBatteryLevel')
+  const batteryPercent = document.getElementById('bmwBatteryPercent')
 
-  // Update charging icon
-  const chargingIcon = document.getElementById('bmwCharging')
-  chargingIcon.classList.remove('charging')
-  if (isCharging) {
-    chargingIcon.textContent = '⚡ Charging'
-    chargingIcon.classList.add('charging')
-  } else if (batteryLevel >= 90) {
-    chargingIcon.textContent = '✓ Charged'
+  batteryLevel_elem.style.width = `${batteryLevel}%`
+  batteryLevel_elem.classList.remove('low', 'medium', 'high')
+
+  if (batteryLevel <= 33) {
+    batteryLevel_elem.classList.add('low')
+  } else if (batteryLevel <= 66) {
+    batteryLevel_elem.classList.add('medium')
   } else {
-    chargingIcon.textContent = '🔌 Not plugged'
+    batteryLevel_elem.classList.add('high')
+  }
+
+  batteryPercent.textContent = `${batteryLevel}%`
+
+  // Update charging status
+  const chargingStatus = document.getElementById('bmwChargingStatus')
+  const chargingText = chargingStatus.querySelector('.status-text')
+  if (isCharging) {
+    chargingText.textContent = '⚡ Charging'
+  } else {
+    chargingText.textContent = 'Not charging'
   }
 
   // Update range
@@ -547,46 +550,49 @@ async function updateMitsubishiStatus() {
   }
 
   // Update connection status
-  const connectionStatus = document.getElementById('mitsubishiConnection')
+  const connectionBadge = document.getElementById('mitsubishiConnection')
   const statusInfo = document.getElementById('mitsubishiStatusInfo')
+  const connectionText = connectionBadge.querySelector('.connection-text')
+  const infoPanel = document.getElementById('mitsubishiPanel')
 
   if (!hasConnection) {
-    connectionStatus.classList.remove('disconnected')
-    connectionStatus.classList.add('error')
+    connectionBadge.classList.add('disconnected')
+    connectionBadge.classList.remove('error')
+    connectionText.textContent = 'Offline'
     statusInfo.style.display = 'none'
+    infoPanel.classList.add('offline')
     return
   }
 
-  connectionStatus.classList.remove('disconnected', 'error')
-  statusInfo.style.display = 'flex'
+  connectionBadge.classList.remove('disconnected', 'error')
+  connectionText.textContent = 'Online'
+  statusInfo.style.display = 'block'
+  infoPanel.classList.remove('offline')
 
-  // Update battery bars
-  const batteryBars = document.querySelectorAll('#mitsubishiBattery .battery-bar')
-  const activeBars = Math.ceil((batteryLevel / 100) * 6)
-  batteryBars.forEach((bar, index) => {
-    bar.classList.remove('active', 'low', 'medium', 'high')
-    if (index < activeBars) {
-      bar.classList.add('active')
-      if (batteryLevel <= 33) {
-        bar.classList.add('low')
-      } else if (batteryLevel <= 66) {
-        bar.classList.add('medium')
-      } else {
-        bar.classList.add('high')
-      }
-    }
-  })
+  // Update battery level
+  const batteryLevel_elem = document.getElementById('mitsubishiBatteryLevel')
+  const batteryPercent = document.getElementById('mitsubishiBatteryPercent')
 
-  // Update charging icon
-  const chargingIcon = document.getElementById('mitsubishiCharging')
-  chargingIcon.classList.remove('charging')
-  if (isCharging) {
-    chargingIcon.textContent = '⚡ Charging'
-    chargingIcon.classList.add('charging')
-  } else if (batteryLevel >= 90) {
-    chargingIcon.textContent = '✓ Charged'
+  batteryLevel_elem.style.width = `${batteryLevel}%`
+  batteryLevel_elem.classList.remove('low', 'medium', 'high')
+
+  if (batteryLevel <= 33) {
+    batteryLevel_elem.classList.add('low')
+  } else if (batteryLevel <= 66) {
+    batteryLevel_elem.classList.add('medium')
   } else {
-    chargingIcon.textContent = '🔌 Not plugged'
+    batteryLevel_elem.classList.add('high')
+  }
+
+  batteryPercent.textContent = `${batteryLevel}%`
+
+  // Update charging status
+  const chargingStatus = document.getElementById('mitsubishiChargingStatus')
+  const chargingText = chargingStatus.querySelector('.status-text')
+  if (isCharging) {
+    chargingText.textContent = '⚡ Charging'
+  } else {
+    chargingText.textContent = 'Not charging'
   }
 
   // Update range

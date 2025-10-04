@@ -13,53 +13,79 @@
         <div id="clock" class="clock"></div>
         <div id="weather" class="weather sidebar-section"></div>
         <div class="car sidebar-section">
-          <div class="car-with-range">
-            <div class="car-left-info">
-              <div class="connection-status disconnected" id="bmwConnection"></div>
-              <div id="bmwStatusInfo" style="display: none;">
-                <div class="battery-bars" id="bmwBattery">
-                  <div class="battery-bar"></div>
-                  <div class="battery-bar"></div>
-                  <div class="battery-bar"></div>
-                  <div class="battery-bar"></div>
-                  <div class="battery-bar"></div>
-                  <div class="battery-bar"></div>
+          <div class="car-info-panel" id="bmwPanel">
+            <div class="car-main-row">
+              <div class="car-status-column">
+                <div class="connection-badge disconnected" id="bmwConnection">
+                  <span class="connection-dot"></span>
+                  <span class="connection-text">Offline</span>
                 </div>
-                <div class="charging-icon" id="bmwCharging">🔌</div>
-                <div class="range-display" id="bmwRange">-- km</div>
+                <div class="car-status-card" id="bmwStatusInfo" style="display: none;">
+                  <div class="status-item">
+                    <div class="battery-indicator">
+                      <div class="battery-icon">
+                        <div class="battery-level" id="bmwBatteryLevel"></div>
+                      </div>
+                      <span class="battery-percentage" id="bmwBatteryPercent">--</span>
+                    </div>
+                  </div>
+                  <div class="status-item" id="bmwChargingStatus">
+                    <span class="status-text">Not charging</span>
+                  </div>
+                  <div class="status-item">
+                    <span class="status-label">Range:</span>
+                    <span class="range-value" id="bmwRange">-- km</span>
+                  </div>
+                  <div class="status-item" id="bmwRemoteStatus" style="display: none;">
+                    <span class="status-text" id="bmwRemoteText"></span>
+                  </div>
+                </div>
               </div>
+              <img src="330.png" alt="BMW Photo" onclick="drive(this)" class="car-image" />
             </div>
-            <img src="330.png" alt="BMW Photo" onclick="drive(this)" />
-          </div>
-          <div class="controls">
-            <div class="control-button" onclick="controlBMW('climate', this)">🔥</div>
-            <div class="control-button" onclick="controlBMW('flash', this)">💡</div>
-            <div class="control-button lock-button" id="bmwLockStatus" onclick="controlBMW('lock', this)">🔒</div>
-            <div class="control-button" onclick="controlBMW('unlock', this)">🔓</div>
+            <div class="controls">
+              <div class="control-button" onclick="controlBMW('climate', this)">🔥</div>
+              <div class="control-button" onclick="controlBMW('flash', this)">💡</div>
+              <div class="control-button lock-button" id="bmwLockStatus" onclick="controlBMW('lock', this)">🔒</div>
+              <div class="control-button" onclick="controlBMW('unlock', this)">🔓</div>
+            </div>
           </div>
         </div>
         <div class="car sidebar-section">
-          <div class="car-with-range">
-            <div class="car-left-info">
-              <div class="connection-status disconnected" id="mitsubishiConnection"></div>
-              <div id="mitsubishiStatusInfo" style="display: none;">
-                <div class="battery-bars" id="mitsubishiBattery">
-                  <div class="battery-bar"></div>
-                  <div class="battery-bar"></div>
-                  <div class="battery-bar"></div>
-                  <div class="battery-bar"></div>
-                  <div class="battery-bar"></div>
-                  <div class="battery-bar"></div>
+          <div class="car-info-panel" id="mitsubishiPanel">
+            <div class="car-main-row">
+              <div class="car-status-column">
+                <div class="connection-badge disconnected" id="mitsubishiConnection">
+                  <span class="connection-dot"></span>
+                  <span class="connection-text">Offline</span>
                 </div>
-                <div class="charging-icon" id="mitsubishiCharging">🔌</div>
-                <div class="range-display" id="mitsubishiRange">-- km</div>
+                <div class="car-status-card" id="mitsubishiStatusInfo" style="display: none;">
+                  <div class="status-item">
+                    <div class="battery-indicator">
+                      <div class="battery-icon">
+                        <div class="battery-level" id="mitsubishiBatteryLevel"></div>
+                      </div>
+                      <span class="battery-percentage" id="mitsubishiBatteryPercent">--</span>
+                    </div>
+                  </div>
+                  <div class="status-item" id="mitsubishiChargingStatus">
+                    <span class="status-text">Not charging</span>
+                  </div>
+                  <div class="status-item">
+                    <span class="status-label">Range:</span>
+                    <span class="range-value" id="mitsubishiRange">-- km</span>
+                  </div>
+                  <div class="status-item" id="mitsubishiRemoteStatus" style="display: none;">
+                    <span class="status-text" id="mitsubishiRemoteText"></span>
+                  </div>
+                </div>
               </div>
+              <img src="outlander.png" alt="Outlander Photo" onclick="driveToChart(this)" class="car-image" />
             </div>
-            <img src="outlander.png" alt="Outlander Photo" onclick="driveToChart(this)" />
-          </div>
-          <div class="controls">
-            <div class="control-button" onclick="controlOutlander('remoteHeating', this)">🔥</div>
-            <div class="control-button" onclick="controlOutlander('lights', this)">💡</div>
+            <div class="controls">
+              <div class="control-button" onclick="controlOutlander('remoteHeating', this)">🔥</div>
+              <div class="control-button" onclick="controlOutlander('lights', this)">💡</div>
+            </div>
           </div>
         </div>
       </div>

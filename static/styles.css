@@ -56,59 +56,56 @@ html {
 .car {
   margin-top: 18px;
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: block;
   background: none;
   border-radius: 0;
   box-shadow: none;
-  padding: 0 0 10px 0;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.car:last-child {
+  padding: 0;
   border-bottom: none;
 }
 
-.sidebar img {
-  max-width: 150px;
+.car-image {
+  width: auto;
+  max-width: 140px;
+  max-height: 100px;
   border-radius: 8px;
   display: block;
   transform-origin: center center;
-  position: relative;
-  z-index: 1000;
+  cursor: pointer;
 }
 
 .controls {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0;
-  justify-items: stretch;
-  align-items: stretch;
+  display: flex;
+  gap: 4px;
+  justify-content: flex-start;
   width: 100%;
+  margin-top: 8px;
 }
 
 .control-button {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: 8px;
-  background-color: transparent;
+  background: none;
   color: var(--text-color);
-  font-size: 22px;
+  font-size: 24px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s, color 0.2s;
+  transition: transform 0.1s, opacity 0.2s;
   margin: 0;
-  padding: 0;
+  padding: 2px;
   box-shadow: none;
   border: none;
+  min-width: 36px;
+  min-height: 36px;
 }
-.control-button:hover,
+
+.control-button:hover {
+  transform: scale(1.1);
+}
+
 .control-button:active {
-  background: var(--border-color);
-  color: var(--text-color);
+  transform: scale(0.9);
+  opacity: 0.7;
 }
 
 .control-button i {
@@ -394,52 +391,128 @@ html {
   margin-right: 0;
 }
 
-.car-left-info {
+.car-info-panel {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  align-items: flex-start;
+  gap: 8px;
+  background: var(--input-bg);
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
 }
 
-#bmwStatusInfo,
-#mitsubishiStatusInfo {
+.car-main-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+}
+
+.car-status-column {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  align-items: flex-start;
+  gap: 6px;
+  flex: 0 0 auto;
+  width: fit-content;
 }
 
-.battery-bars {
+.car-info-panel.offline {
+  opacity: 0.6;
+}
+
+.car-info-panel.offline .controls {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.car-status-card {
   display: flex;
-  gap: 2px;
-}
-
-.battery-bar {
-  width: 10px;
-  height: 16px;
+  flex-direction: column;
+  gap: 5px;
   background: transparent;
-  border: 1px solid var(--border-color);
-  border-radius: 2px;
-  transition: background 0.3s;
+  padding: 0;
+  box-shadow: none;
+  font-size: 11px;
 }
 
-.battery-bar.active.low {
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-label {
+  font-size: 10px;
+  color: var(--text-color);
+  opacity: 0.7;
+}
+
+.status-text {
+  font-size: 10px;
+  color: var(--text-color);
+}
+
+.battery-indicator {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.battery-icon {
+  width: 28px;
+  height: 14px;
+  border: 2px solid var(--text-color);
+  border-radius: 3px;
+  position: relative;
+  opacity: 0.8;
+}
+
+.battery-icon::after {
+  content: '';
+  position: absolute;
+  right: -4px;
+  top: 4px;
+  width: 3px;
+  height: 6px;
+  background: var(--text-color);
+  border-radius: 0 2px 2px 0;
+  opacity: 0.8;
+}
+
+.battery-level {
+  height: 100%;
+  background: #22c55e;
+  border-radius: 1px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.battery-level.low {
   background: #ef4444;
 }
 
-.battery-bar.active.medium {
+.battery-level.medium {
   background: #f59e0b;
 }
 
-.battery-bar.active.high {
+.battery-level.high {
   background: #22c55e;
 }
 
-.charging-icon {
-  font-size: 14px;
+.battery-percentage {
+  font-size: 11px;
+  font-weight: bold;
+  color: var(--text-color);
+  font-family: monospace;
 }
 
-.charging-icon.charging {
+.charging-indicator {
+  display: flex;
+  align-items: center;
+}
+
+.charging-bolt {
+  font-size: 14px;
   animation: pulse 1.5s infinite;
 }
 
@@ -448,32 +521,51 @@ html {
   50% { opacity: 0.5; }
 }
 
-.connection-status {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #22c55e;
-}
-
-.connection-status.disconnected {
-  background: #9ca3af;
-}
-
-.connection-status.error {
-  background: #fca5a5;
-}
-
-.car-with-range {
+.range-display {
   display: flex;
   align-items: center;
-  gap: 4px;
+  font-size: 11px;
 }
 
-.range-display {
-  font-size: 10px;
+.range-value {
   font-weight: bold;
   color: var(--text-color);
-  text-align: left;
+  font-family: monospace;
+}
+
+.connection-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  background: transparent;
+  box-shadow: none;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.connection-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 4px #22c55e;
+}
+
+.connection-badge.disconnected .connection-dot {
+  background: #9ca3af;
+  box-shadow: none;
+}
+
+.connection-badge.error .connection-dot {
+  background: #ef4444;
+  box-shadow: 0 0 4px #ef4444;
+}
+
+.connection-text {
+  color: var(--text-color);
+  opacity: 0.9;
 }
 
 .lock-button.locked {
