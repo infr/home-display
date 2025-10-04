@@ -237,7 +237,7 @@
         margin: 5% auto;
         padding: 30px;
         border-radius: 8px;
-        width: 600px;
+        width: 800px;
         max-width: 90%;
         max-height: 85vh;
         overflow-y: auto;
@@ -260,6 +260,19 @@
         font-weight: bold;
         cursor: pointer;
         color: var(--text-color);
+      }
+
+      .modal-body {
+        display: flex;
+        gap: 30px;
+      }
+
+      .modal-column {
+        flex: 1;
+      }
+
+      .modal-column.logs {
+        flex: 1.2;
       }
 
       .setting-item {
@@ -535,28 +548,34 @@
           <h2>Settings</h2>
           <span class="close" onclick="closeSettings()">&times;</span>
         </div>
-        <div class="setting-item">
-          <label for="darkModeSelect">Theme</label>
-          <select id="darkModeSelect" onchange="updateDarkMode()">
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-            <option value="auto">Auto (19:00-06:00)</option>
-          </select>
-        </div>
-        <div class="setting-item">
-          <label for="maxValue">Max Price Value (c/kWh)</label>
-          <input type="number" id="maxValue" value="30" min="10" max="100" onchange="updateMaxValue()">
-        </div>
-        <div class="setting-item">
-          <label class="toggle">
-            <input type="checkbox" id="testModeToggle" onchange="toggleTestMode()">
-            <span>Test Mode (Random Data)</span>
-          </label>
-        </div>
-        <div class="setting-item">
-          <label for="output">Debug Log (last 10 entries)</label>
-          <textarea id="output" readonly rows="8"></textarea>
-          <button onclick="clearDebugLogs()" style="margin-top: 8px; padding: 8px 16px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-color); cursor: pointer;">Clear Log</button>
+        <div class="modal-body">
+          <div class="modal-column">
+            <div class="setting-item">
+              <label for="darkModeSelect">Theme</label>
+              <select id="darkModeSelect" onchange="updateDarkMode()">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                <option value="auto">Auto (19:00-06:00)</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <label for="maxValue">Max Price Value (c/kWh)</label>
+              <input type="number" id="maxValue" value="30" min="10" max="100" onchange="updateMaxValue()">
+            </div>
+            <div class="setting-item">
+              <label class="toggle">
+                <input type="checkbox" id="testModeToggle" onchange="toggleTestMode()">
+                <span>Test Mode (Random Data)</span>
+              </label>
+            </div>
+          </div>
+          <div class="modal-column logs">
+            <div class="setting-item">
+              <label for="output">Debug Log (last 10 entries)</label>
+              <textarea id="output" readonly rows="12"></textarea>
+              <button onclick="clearDebugLogs()" style="margin-top: 8px; padding: 8px 16px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-color); cursor: pointer;">Clear Log</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
