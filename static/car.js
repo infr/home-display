@@ -27,6 +27,12 @@ function driveToChart(element) {
   console.log('[Car Animation] Starting chart animation with', priceData.length, 'price points')
   isAnimatingChart = true
 
+  // Reset flags for new animation
+  window._clearedYHistoryOnReverse = false
+  window._loggedOnChart = false
+  window._lastSmoothY = undefined
+  window._lastRotation = undefined
+
   const chartRect = canvas.getBoundingClientRect()
   const carRect = element.getBoundingClientRect()
 
@@ -52,19 +58,22 @@ function driveToChart(element) {
   const minPrice = 0
   const maxPrice = ELECTRICITY_CONFIG?.priceScale?.max || 30
 
-  // Pre-calculate smoothed price values for performance
+  // Pre-calculate smoothed price values - use last 5 prices for smoother transitions
   const smoothedPrices = []
   for (let i = 0; i < dataToShow.length; i++) {
-    const startIdx = Math.max(0, i - 3)
-    const endIdx = Math.min(dataToShow.length - 1, i + 3)
+    const startIdx = Math.max(0, i - 4)  // Look back 4 positions (5 total including current)
     let sum = 0
     let count = 0
-    for (let j = startIdx; j <= endIdx; j++) {
+    for (let j = startIdx; j <= i; j++) {
       const value = dataToShow[j]?.value
-      sum += value !== undefined ? value : 15
-      count++
+      if (value !== undefined) {
+        sum += value
+        count++
+      }
     }
-    smoothedPrices.push(sum / count)
+    // If no valid values found, use current value or default to 15
+    const smoothed = count > 0 ? sum / count : (dataToShow[i]?.value ?? 15)
+    smoothedPrices.push(smoothed)
   }
 
   const yHistory = []
@@ -117,6 +126,14 @@ function driveToChart(element) {
       } else {
         xProgress = 2 - chartProgress * 2
         direction = -1
+
+        // Clear yHistory and rotationHistory when direction changes to prevent jumps from old forward-journey values
+        if (!window._clearedYHistoryOnReverse) {
+          yHistory.length = 0
+          rotationHistory.length = 0
+          window._clearedYHistoryOnReverse = true
+          console.log('[Car Animation] Direction reversed, cleared yHistory and rotationHistory to prevent jumps')
+        }
       }
     } else {
       phase = 'returning'
@@ -182,9 +199,9 @@ function driveToChart(element) {
         barTopCanvas = paddingTop + chartHeightPx * (1 - normalizedHeight)
       }
 
-      // Smooth the Y position (reduced window for better performance)
+      // Smooth the Y position with moderate window
       yHistory.push(barTopCanvas)
-      if (yHistory.length > 15) yHistory.shift()
+      if (yHistory.length > 20) yHistory.shift()
 
       // Simple average using stored sum for performance
       let ySum = 0
@@ -193,27 +210,42 @@ function driveToChart(element) {
       }
       const smoothY = ySum / yHistory.length
 
-      // Debug logging - log every 10th frame to see the progression
-      if (Math.floor(xProgress * 100) % 10 === 0) {
-        const rawValue = dataToShow[dataIndex]?.value
-        console.log(`[Car Animation] progress=${(xProgress * 100).toFixed(1)}%, idx=${dataIndex}/${dataToShow.length}, raw=${rawValue?.toFixed(4)}, smoothed=${priceValue.toFixed(4)}, effective=${effectivePrice.toFixed(4)}, barTop=${barTopCanvas.toFixed(2)}, smoothY=${smoothY.toFixed(2)}`)
+      // Debug logging - detect Y jumps above 3 pixels
+      if (window._lastSmoothY !== undefined) {
+        const yDiff = Math.abs(smoothY - window._lastSmoothY)
+        if (yDiff > 3) {
+          const rawValue = dataToShow[dataIndex]?.value
+          console.log(`[Car Animation] Y JUMP detected! diff=${yDiff.toFixed(2)}, progress=${(xProgress * 100).toFixed(1)}%, idx=${dataIndex}/${dataToShow.length}, raw=${rawValue?.toFixed(4)}, smoothed=${priceValue.toFixed(4)}, effective=${effectivePrice.toFixed(4)}, barTop=${barTopCanvas.toFixed(2)}, prevSmoothY=${window._lastSmoothY.toFixed(2)}, newSmoothY=${smoothY.toFixed(2)}, yHistory.length=${yHistory.length}`)
+        }
       }
+      window._lastSmoothY = smoothY
 
       // Calculate rotation based on Y change
-      if (yHistory.length >= 10) {
-        const yChange = yHistory[yHistory.length - 1] - yHistory[yHistory.length - 10]
-        rotation = Math.atan2(yChange * direction, 20) * (180 / Math.PI)
+      if (yHistory.length >= 5) {
+        const lookback = Math.min(5, yHistory.length - 1)
+        const yChange = yHistory[yHistory.length - 1] - yHistory[yHistory.length - 1 - lookback]
+        rotation = Math.atan2(yChange * direction, 30) * (180 / Math.PI)
         rotation = Math.max(-80, Math.min(80, rotation))
       }
 
-      // Smooth rotation (reduced window for better performance)
+      // Smooth rotation with moderate window
       rotationHistory.push(rotation)
-      if (rotationHistory.length > 12) rotationHistory.shift()
+      if (rotationHistory.length > 15) rotationHistory.shift()
       let rotSum = 0
       for (let i = 0; i < rotationHistory.length; i++) {
         rotSum += rotationHistory[i]
       }
       rotation = rotSum / rotationHistory.length
+
+      // Debug logging - detect rotation jumps above 3 degrees (disabled for now)
+      // if (window._lastRotation !== undefined) {
+      //   const rotDiff = Math.abs(rotation - window._lastRotation)
+      //   if (rotDiff > 3) {
+      //     const rawValue = dataToShow[dataIndex]?.value
+      //     console.log(`[Car Animation] ROTATION JUMP detected! diff=${rotDiff.toFixed(2)}°, progress=${(xProgress * 100).toFixed(1)}%, idx=${dataIndex}, prevRot=${window._lastRotation.toFixed(2)}°, newRot=${rotation.toFixed(2)}°`)
+      //   }
+      // }
+      window._lastRotation = rotation
 
       // Convert canvas Y to screen Y
       const targetScreenY = chartRect.top + (smoothY / canvas.height) * chartRect.height - element.offsetHeight
