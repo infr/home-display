@@ -234,11 +234,13 @@
 
       .modal-content {
         background-color: var(--bg-color);
-        margin: 10% auto;
+        margin: 5% auto;
         padding: 30px;
         border-radius: 8px;
-        width: 400px;
+        width: 600px;
         max-width: 90%;
+        max-height: 85vh;
+        overflow-y: auto;
       }
 
       .modal-header {
@@ -272,13 +274,20 @@
       }
 
       .setting-item input[type="number"],
-      .setting-item select {
+      .setting-item select,
+      .setting-item textarea {
         width: 100%;
         padding: 8px;
         border: 1px solid var(--border-color);
         border-radius: 4px;
         background: var(--input-bg);
         color: var(--text-color);
+        font-family: monospace;
+        font-size: 12px;
+      }
+
+      .setting-item textarea {
+        resize: vertical;
       }
 
       .toggle {
@@ -442,6 +451,10 @@
         background: #9ca3af;
       }
 
+      .connection-status.error {
+        background: #fca5a5;
+      }
+
       .car-with-range {
         display: flex;
         align-items: center;
@@ -473,7 +486,7 @@
         <div class="car sidebar-section">
           <div class="car-with-range">
             <div class="car-left-info">
-              <div class="connection-status" id="bmwConnection"></div>
+              <div class="connection-status disconnected" id="bmwConnection"></div>
               <div id="bmwStatusInfo" style="display: none;">
                 <div class="battery-bars" id="bmwBattery">
                   <div class="battery-bar"></div>
@@ -539,6 +552,10 @@
             <input type="checkbox" id="testModeToggle" onchange="toggleTestMode()">
             <span>Test Mode (Random Data)</span>
           </label>
+        </div>
+        <div class="setting-item">
+          <label for="output">Debug Log</label>
+          <textarea id="output" readonly rows="8"></textarea>
         </div>
       </div>
     </div>
@@ -955,7 +972,8 @@
             }
           } catch (error) {
             console.error('Error fetching VIN:', error)
-            document.getElementById('output').innerText = `Error fetching VIN: ${error.message}`
+            const output = document.getElementById('output')
+            if (output) output.value += `[BMW] VIN fetch error: ${error.message}\n`
           }
         }
         return vin
@@ -968,12 +986,16 @@
         let batteryLevel, range, isLocked, isCharging, hasConnection
 
         if (testMode) {
-          // Generate random test data
-          hasConnection = true
-          batteryLevel = Math.floor(Math.random() * 100)
-          range = Math.floor(Math.random() * 400) + 50 // 50-450 km
-          isLocked = Math.random() > 0.5
-          isCharging = batteryLevel < 80 && Math.random() > 0.6
+          // Simulate random connection status (90% success, 10% failure)
+          hasConnection = Math.random() > 0.1
+
+          if (hasConnection) {
+            // Generate random test data
+            batteryLevel = Math.floor(Math.random() * 100)
+            range = Math.floor(Math.random() * 400) + 50 // 50-450 km
+            isLocked = Math.random() > 0.5
+            isCharging = batteryLevel < 80 && Math.random() > 0.6
+          }
         } else {
           const vin = await initializeVIN()
           if (!vin) {
@@ -1005,6 +1027,8 @@
               }
             } catch (error) {
               console.error('Error fetching BMW status:', error)
+              const output = document.getElementById('output')
+              if (output) output.value += `[BMW] Status fetch error: ${error.message}\n`
               hasConnection = false
             }
           }
@@ -1015,12 +1039,13 @@
         const statusInfo = document.getElementById('bmwStatusInfo')
 
         if (!hasConnection) {
-          connectionStatus.classList.add('disconnected')
+          connectionStatus.classList.remove('disconnected')
+          connectionStatus.classList.add('error')
           statusInfo.style.display = 'none'
           return
         }
 
-        connectionStatus.classList.remove('disconnected')
+        connectionStatus.classList.remove('disconnected', 'error')
         statusInfo.style.display = 'flex'
 
         // Update battery bars
@@ -1092,13 +1117,15 @@
                 }
               } else {
                 setButtonState(button, 'error')
-                document.getElementById('output').innerText = `Command failed: ${JSON.stringify(data, null, 2)}`
+                const output = document.getElementById('output')
+                if (output) output.value += `[BMW] Command failed: ${JSON.stringify(data, null, 2)}\n`
               }
             })
             .catch(error => {
               button.classList.remove('spin')
               setButtonState(button, 'error')
-              document.getElementById('output').innerText = `Error: ${error.message}`
+              const output = document.getElementById('output')
+              if (output) output.value += `[BMW] Error: ${error.message}\n`
             })
         })
       }
@@ -1114,13 +1141,15 @@
               setButtonState(button, 'success')
             } else {
               setButtonState(button, 'error')
-              document.getElementById('output').innerText = `Command failed: ${JSON.stringify(data, null, 2)}`
+              const output = document.getElementById('output')
+              if (output) output.value += `[Outlander] Command failed: ${JSON.stringify(data, null, 2)}\n`
             }
           })
           .catch(error => {
             button.classList.remove('spin')
             setButtonState(button, 'error')
-            document.getElementById('output').innerText = `Error: ${error.message}`
+            const output = document.getElementById('output')
+            if (output) output.value += `[Outlander] Error: ${error.message}\n`
           })
       }
 
