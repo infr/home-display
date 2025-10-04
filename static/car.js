@@ -70,15 +70,22 @@ function driveToChart(element) {
   // Calculate first bar position for initial drive
   const firstPriceValue = dataToShow[0]?.value || 15
   const chartHeightPx = canvas.height - paddingTop - paddingBottom
-  let firstNormalizedHeight
+  let firstBarTopCanvas
+
   if (firstPriceValue < 0) {
-    firstNormalizedHeight = 0
+    // Negative prices: bars extend downward from baseline
+    const baselineCanvas = paddingTop + chartHeightPx
+    const negativeBarHeight = Math.min(Math.abs(firstPriceValue / maxPrice) * chartHeightPx, 30)
+    firstBarTopCanvas = baselineCanvas + negativeBarHeight
   } else if (firstPriceValue > maxPrice) {
-    firstNormalizedHeight = 1
+    // Overflow: bar at top
+    firstBarTopCanvas = paddingTop
   } else {
-    firstNormalizedHeight = firstPriceValue / maxPrice
+    // Normal range: 0-maxPrice
+    const normalizedHeight = firstPriceValue / maxPrice
+    firstBarTopCanvas = paddingTop + chartHeightPx * (1 - normalizedHeight)
   }
-  const firstBarTopCanvas = paddingTop + chartHeightPx * (1 - firstNormalizedHeight)
+
   const firstBarScreenY = chartRect.top + (firstBarTopCanvas / canvas.height) * chartRect.height - element.offsetHeight
 
   // Track last position when leaving chart
@@ -148,17 +155,21 @@ function driveToChart(element) {
       const dataIndex = Math.floor(xProgress * (smoothedPrices.length - 1))
       const priceValue = smoothedPrices[dataIndex] || 15
 
-      // Calculate Y position based on price
-      let normalizedHeight
+      // Calculate Y position based on price (matching electricity chart logic)
+      let barTopCanvas
       if (priceValue < 0) {
-        normalizedHeight = 0
+        // Negative prices: bars extend downward from baseline
+        const baselineCanvas = paddingTop + chartHeightPx
+        const negativeBarHeight = Math.min(Math.abs(priceValue / maxPrice) * chartHeightPx, 30)
+        barTopCanvas = baselineCanvas + negativeBarHeight
       } else if (priceValue > maxPrice) {
-        normalizedHeight = 1
+        // Overflow: bar at top
+        barTopCanvas = paddingTop
       } else {
-        normalizedHeight = priceValue / maxPrice
+        // Normal range: 0-maxPrice
+        const normalizedHeight = priceValue / maxPrice
+        barTopCanvas = paddingTop + chartHeightPx * (1 - normalizedHeight)
       }
-
-      const barTopCanvas = paddingTop + chartHeightPx * (1 - normalizedHeight)
 
       // Smooth the Y position (reduced window for better performance)
       yHistory.push(barTopCanvas)
