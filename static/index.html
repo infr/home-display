@@ -271,7 +271,8 @@
         font-weight: bold;
       }
 
-      .setting-item input[type="number"] {
+      .setting-item input[type="number"],
+      .setting-item select {
         width: 100%;
         padding: 8px;
         border: 1px solid var(--border-color);
@@ -376,6 +377,91 @@
         margin-left: 0;
         margin-right: 0;
       }
+
+      .car-left-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        align-items: flex-start;
+      }
+
+      #bmwStatusInfo {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        align-items: flex-start;
+      }
+
+      .battery-bars {
+        display: flex;
+        gap: 2px;
+      }
+
+      .battery-bar {
+        width: 10px;
+        height: 16px;
+        background: transparent;
+        border: 1px solid var(--border-color);
+        border-radius: 2px;
+        transition: background 0.3s;
+      }
+
+      .battery-bar.active.low {
+        background: #ef4444;
+      }
+
+      .battery-bar.active.medium {
+        background: #f59e0b;
+      }
+
+      .battery-bar.active.high {
+        background: #22c55e;
+      }
+
+      .charging-icon {
+        font-size: 14px;
+      }
+
+      .charging-icon.charging {
+        animation: pulse 1.5s infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+
+      .connection-status {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #22c55e;
+      }
+
+      .connection-status.disconnected {
+        background: #9ca3af;
+      }
+
+      .car-with-range {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .range-display {
+        font-size: 10px;
+        font-weight: bold;
+        color: var(--text-color);
+        text-align: left;
+      }
+
+      .lock-button.locked {
+        color: #ef4444;
+      }
+
+      .lock-button.unlocked {
+        color: #22c55e;
+      }
     </style>
   </head>
   <body>
@@ -385,11 +471,28 @@
         <div id="clock" class="clock"></div>
         <div id="weather" class="weather sidebar-section"></div>
         <div class="car sidebar-section">
-          <img src="330.png" alt="BMW Photo" onclick="drive(this)" />
+          <div class="car-with-range">
+            <div class="car-left-info">
+              <div class="connection-status" id="bmwConnection"></div>
+              <div id="bmwStatusInfo" style="display: none;">
+                <div class="battery-bars" id="bmwBattery">
+                  <div class="battery-bar"></div>
+                  <div class="battery-bar"></div>
+                  <div class="battery-bar"></div>
+                  <div class="battery-bar"></div>
+                  <div class="battery-bar"></div>
+                  <div class="battery-bar"></div>
+                </div>
+                <div class="charging-icon" id="bmwCharging">🔌</div>
+                <div class="range-display" id="bmwRange">-- km</div>
+              </div>
+            </div>
+            <img src="330.png" alt="BMW Photo" onclick="drive(this)" />
+          </div>
           <div class="controls">
             <div class="control-button" onclick="controlBMW('climate', this)">🔥</div>
             <div class="control-button" onclick="controlBMW('flash', this)">💡</div>
-            <div class="control-button" onclick="controlBMW('lock', this)">🔒</div>
+            <div class="control-button lock-button" id="bmwLockStatus" onclick="controlBMW('lock', this)">🔒</div>
             <div class="control-button" onclick="controlBMW('unlock', this)">🔓</div>
           </div>
         </div>
@@ -420,10 +523,12 @@
           <span class="close" onclick="closeSettings()">&times;</span>
         </div>
         <div class="setting-item">
-          <label class="toggle">
-            <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()">
-            <span>Dark Mode</span>
-          </label>
+          <label for="darkModeSelect">Theme</label>
+          <select id="darkModeSelect" onchange="updateDarkMode()">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+            <option value="auto">Auto (19:00-06:00)</option>
+          </select>
         </div>
         <div class="setting-item">
           <label for="maxValue">Max Price Value (c/kWh)</label>
@@ -677,17 +782,53 @@
       }
 
       // Settings management
+      function isAutoDarkMode() {
+        const now = new Date()
+        const hour = now.getHours()
+        return hour >= 19 || hour < 6
+      }
+
+      function applyTheme(isDark) {
+        if (isDark) {
+          document.documentElement.classList.add('dark-mode')
+        } else {
+          document.documentElement.classList.remove('dark-mode')
+        }
+
+        // Update chart colors
+        if (typeof ELECTRICITY_CONFIG !== 'undefined') {
+          ELECTRICITY_CONFIG.colors.background = isDark ? '#1f2937' : '#f3f4f6'
+          ELECTRICITY_CONFIG.colors.text = isDark ? '#f3f4f6' : '#1f2937'
+          ELECTRICITY_CONFIG.colors.grid = isDark ? '#4b5563' : '#d1d5db'
+          if (typeof renderElectricityChart === 'function') {
+            renderElectricityChart()
+          }
+        }
+      }
+
       function loadSettings() {
-        const darkMode = localStorage.getItem('darkMode') === 'true'
+        const themeMode = localStorage.getItem('themeMode') || 'light'
         const maxValue = parseInt(localStorage.getItem('maxValue')) || 30
         const testMode = localStorage.getItem('testMode') === 'true'
 
-        if (darkMode) {
-          document.documentElement.classList.add('dark-mode')
-          document.getElementById('darkModeToggle').checked = true
-        }
+        document.getElementById('darkModeSelect').value = themeMode
         document.getElementById('maxValue').value = maxValue
         document.getElementById('testModeToggle').checked = testMode
+
+        // Apply theme based on mode
+        if (themeMode === 'dark') {
+          applyTheme(true)
+        } else if (themeMode === 'auto') {
+          applyTheme(isAutoDarkMode())
+          // Check every minute if auto mode needs to update
+          setInterval(() => {
+            if (localStorage.getItem('themeMode') === 'auto') {
+              applyTheme(isAutoDarkMode())
+            }
+          }, 60000)
+        } else {
+          applyTheme(false)
+        }
 
         // Show/hide test mode indicator
         const indicator = document.getElementById('testModeIndicator')
@@ -697,13 +838,10 @@
           indicator.classList.remove('active')
         }
 
-        // Update electricity config with colors
+        // Update electricity config
         if (typeof ELECTRICITY_CONFIG !== 'undefined') {
           ELECTRICITY_CONFIG.priceScale.max = maxValue
           ELECTRICITY_CONFIG.testMode = testMode
-          ELECTRICITY_CONFIG.colors.background = darkMode ? '#1f2937' : '#f3f4f6'
-          ELECTRICITY_CONFIG.colors.text = darkMode ? '#f3f4f6' : '#1f2937'
-          ELECTRICITY_CONFIG.colors.grid = darkMode ? '#4b5563' : '#d1d5db'
         }
       }
 
@@ -715,22 +853,16 @@
         document.getElementById('settingsModal').style.display = 'none'
       }
 
-      function toggleDarkMode() {
-        const isDark = document.getElementById('darkModeToggle').checked
-        localStorage.setItem('darkMode', isDark)
-        if (isDark) {
-          document.documentElement.classList.add('dark-mode')
+      function updateDarkMode() {
+        const mode = document.getElementById('darkModeSelect').value
+        localStorage.setItem('themeMode', mode)
+
+        if (mode === 'dark') {
+          applyTheme(true)
+        } else if (mode === 'auto') {
+          applyTheme(isAutoDarkMode())
         } else {
-          document.documentElement.classList.remove('dark-mode')
-        }
-        // Update chart colors
-        if (typeof ELECTRICITY_CONFIG !== 'undefined') {
-          ELECTRICITY_CONFIG.colors.background = isDark ? '#1f2937' : '#f3f4f6'
-          ELECTRICITY_CONFIG.colors.text = isDark ? '#f3f4f6' : '#1f2937'
-          ELECTRICITY_CONFIG.colors.grid = isDark ? '#4b5563' : '#d1d5db'
-          if (typeof renderElectricityChart === 'function') {
-            renderElectricityChart()
-          }
+          applyTheme(false)
         }
       }
 
@@ -762,6 +894,11 @@
           if (typeof fetchElectricityPrices === 'function') {
             fetchElectricityPrices()
           }
+        }
+
+        // Update BMW status with test data
+        if (typeof updateBMWStatus === 'function') {
+          updateBMWStatus()
         }
       }
 
@@ -824,6 +961,116 @@
         return vin
       }
 
+      async function updateBMWStatus() {
+        // Check if test mode is enabled
+        const testMode = localStorage.getItem('testMode') === 'true'
+
+        let batteryLevel, range, isLocked, isCharging, hasConnection
+
+        if (testMode) {
+          // Generate random test data
+          hasConnection = true
+          batteryLevel = Math.floor(Math.random() * 100)
+          range = Math.floor(Math.random() * 400) + 50 // 50-450 km
+          isLocked = Math.random() > 0.5
+          isCharging = batteryLevel < 80 && Math.random() > 0.6
+        } else {
+          const vin = await initializeVIN()
+          if (!vin) {
+            hasConnection = false
+          } else {
+            try {
+              const response = await fetch(`/bmw/status/${vin}`, { method: 'POST' })
+              const data = await response.json()
+
+              if (data.status === 'success' && data.output) {
+                hasConnection = true
+                const output = data.output
+
+                // Parse battery level (look for patterns like "battery: 85%" or "charge_level_hv: 85")
+                const batteryMatch = output.match(/(?:battery|charge_level_hv|remaining_fuel).*?(\d+)/i)
+                batteryLevel = batteryMatch ? parseInt(batteryMatch[1]) : 0
+
+                // Parse range (look for patterns like "range: 350 km" or "remaining_range_electric: 350")
+                const rangeMatch = output.match(/(?:range|remaining_range).*?(\d+)/i)
+                range = rangeMatch ? parseInt(rangeMatch[1]) : 0
+
+                // Parse lock status (look for "SECURED" or "UNLOCKED")
+                isLocked = /SECURED|LOCKED/i.test(output)
+
+                // Parse charging status (look for "CHARGING" or "charging_status")
+                isCharging = /CHARGING|charging_status.*?CHARGING/i.test(output)
+              } else {
+                hasConnection = false
+              }
+            } catch (error) {
+              console.error('Error fetching BMW status:', error)
+              hasConnection = false
+            }
+          }
+        }
+
+        // Update connection status
+        const connectionStatus = document.getElementById('bmwConnection')
+        const statusInfo = document.getElementById('bmwStatusInfo')
+
+        if (!hasConnection) {
+          connectionStatus.classList.add('disconnected')
+          statusInfo.style.display = 'none'
+          return
+        }
+
+        connectionStatus.classList.remove('disconnected')
+        statusInfo.style.display = 'flex'
+
+        // Update battery bars
+        const batteryBars = document.querySelectorAll('#bmwBattery .battery-bar')
+        const activeBars = Math.ceil((batteryLevel / 100) * 6)
+        batteryBars.forEach((bar, index) => {
+          bar.classList.remove('active', 'low', 'medium', 'high')
+          if (index < activeBars) {
+            bar.classList.add('active')
+            if (batteryLevel <= 33) {
+              bar.classList.add('low')
+            } else if (batteryLevel <= 66) {
+              bar.classList.add('medium')
+            } else {
+              bar.classList.add('high')
+            }
+          }
+        })
+
+        // Update charging icon
+        const chargingIcon = document.getElementById('bmwCharging')
+        chargingIcon.classList.remove('charging')
+        if (isCharging) {
+          chargingIcon.textContent = '⚡ Charging'
+          chargingIcon.classList.add('charging')
+        } else if (batteryLevel >= 90) {
+          chargingIcon.textContent = '✓ Charged'
+        } else {
+          chargingIcon.textContent = '🔌 Not plugged'
+        }
+
+        // Update range
+        document.getElementById('bmwRange').textContent = `${range} km`
+
+        // Update lock status icon
+        const lockButton = document.getElementById('bmwLockStatus')
+        lockButton.classList.remove('locked', 'unlocked')
+        if (isLocked) {
+          lockButton.classList.add('locked')
+          lockButton.textContent = '🔒'
+        } else {
+          lockButton.classList.add('unlocked')
+          lockButton.textContent = '🔓'
+        }
+      }
+
+      // Update BMW status every 5 minutes
+      updateBMWStatus()
+      setInterval(updateBMWStatus, 5 * 60 * 1000)
+
       function controlBMW(command, button) {
         initializeVIN().then(vin => {
           if (!vin) {
@@ -839,6 +1086,10 @@
               button.classList.remove('spin')
               if (data.status === 'success') {
                 setButtonState(button, 'success')
+                // Refresh status after lock/unlock commands
+                if (command === 'lock' || command === 'unlock') {
+                  setTimeout(updateBMWStatus, 2000)
+                }
               } else {
                 setButtonState(button, 'error')
                 document.getElementById('output').innerText = `Command failed: ${JSON.stringify(data, null, 2)}`
