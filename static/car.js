@@ -19,10 +19,12 @@ function driveToChart(element) {
 
   const canvas = document.getElementById('electricityChart')
   if (!canvas || typeof priceData === 'undefined' || !priceData.length) {
+    console.log('[Car Animation] No canvas or price data, doing simple drive animation')
     drive(element)
     return
   }
 
+  console.log('[Car Animation] Starting chart animation with', priceData.length, 'price points')
   isAnimatingChart = true
 
   const chartRect = canvas.getBoundingClientRect()
@@ -157,6 +159,12 @@ function driveToChart(element) {
       const dataIndex = Math.floor(xProgress * (smoothedPrices.length - 1))
       const priceValue = smoothedPrices[dataIndex] || 15
 
+      // Log when entering onChart phase
+      if (!window._loggedOnChart) {
+        console.log('[Car Animation] Entered onChart phase, dataToShow.length=', dataToShow.length)
+        window._loggedOnChart = true
+      }
+
       // Calculate Y position based on price (matching electricity chart logic)
       let barTopCanvas
       // Treat very small negative values as zero to avoid jumps at negative/zero boundary
@@ -248,8 +256,10 @@ function driveToChart(element) {
     if (progress < 1) {
       requestAnimationFrame(animate)
     } else {
+      console.log('[Car Animation] Animation complete')
       element.style.transform = ''
       isAnimatingChart = false
+      window._loggedOnChart = false
     }
   }
 
