@@ -34,15 +34,20 @@ def bmw_login():
         print(f"Login failed: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Login failed: {str(e)}")
 
-def execute_command(command_list):
+def execute_command(command_list, check_output=True):
     try:
         print(f"Executing command: {command_list}")
         result = subprocess.check_output(command_list, stderr=subprocess.STDOUT)
         output = result.decode()
         print(f"Command output: {output}")
 
-        # Determine success or failure from the output
-        status = "success" if "Success" in output or "EXECUTED" in output else "failed"
+        # For commands that modify state, check for success indicators
+        # For read-only commands (list, status, info), successful execution means success
+        if check_output:
+            status = "success" if "Success" in output or "EXECUTED" in output else "failed"
+        else:
+            # If command executed without exception, it's successful
+            status = "success"
         return {"status": status, "output": output}
     except subprocess.CalledProcessError as e:
         print(f"Command failed with error: {e.output.decode()}")
@@ -58,7 +63,12 @@ async def control_bmw(command: str, vin: str):
     bmw_login()
     cmd = ["bmw", command, vin]
     print(f"Command to execute: {cmd}")
-    result = execute_command(cmd)
+
+    # Read-only commands don't need output validation
+    read_only_commands = ["info", "status", "trips", "charging"]
+    check_output = command not in read_only_commands
+
+    result = execute_command(cmd, check_output=check_output)
     print(f"Result from execute_command: {result}")
     return result
 
@@ -67,7 +77,7 @@ async def list_vehicles():
     print("Received request to list vehicles.")
     bmw_login()
     print("Logged in successfully. Executing 'bmw list' command.")
-    result = execute_command(["bmw", "list"])
+    result = execute_command(["bmw", "list"], check_output=False)
     print(f"Result from list command: {result}")
     return result
     
