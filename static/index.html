@@ -568,6 +568,9 @@
                 <span>Test Mode (Random Data)</span>
               </label>
             </div>
+            <div class="setting-item">
+              <button onclick="resetSettings()" style="padding: 8px 16px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-color); cursor: pointer; width: 100%;">Reset All Settings</button>
+            </div>
           </div>
           <div class="modal-column logs">
             <div class="setting-item">
@@ -876,6 +879,16 @@
         const output = document.getElementById('output')
         if (output) {
           output.value = ''
+        }
+      }
+
+      function resetSettings() {
+        if (confirm('Reset all settings to defaults?')) {
+          localStorage.removeItem('themeMode')
+          localStorage.removeItem('maxValue')
+          localStorage.removeItem('testMode')
+          localStorage.removeItem('bmw_vin')
+          location.reload()
         }
       }
 
