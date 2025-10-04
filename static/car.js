@@ -237,8 +237,16 @@ function driveToChart(element) {
 }
 
 // BMW car control functions
+let vinFetchFailed = false // Track if VIN fetch has failed to prevent repeated attempts
+
 async function initializeVIN() {
   let vin = localStorage.getItem('bmw_vin')
+
+  // Don't retry if we already know it failed
+  if (!vin && vinFetchFailed) {
+    return null
+  }
+
   if (!vin) {
     console.log('VIN not found in localStorage. Fetching VIN from API...')
     try {
@@ -246,19 +254,26 @@ async function initializeVIN() {
       const data = await response.json()
       addDebugLog(`GET /bmw/list: ${response.status} - ${JSON.stringify(data).substring(0, 100)}`)
 
-      if (data && data.output) {
+      // Check if the API call was successful
+      if (data && data.status === 'success' && data.output) {
         const match = data.output.match(/\((\w+)\)/)
         if (match) {
           vin = match[1]
           localStorage.setItem('bmw_vin', vin)
+          vinFetchFailed = false // Reset flag on success
           console.log('VIN stored in localStorage:', vin)
         } else {
-          throw new Error('VIN not found in response.')
+          vinFetchFailed = true
+          throw new Error('VIN not found in response output.')
         }
+      } else {
+        vinFetchFailed = true
+        throw new Error('BMW list API failed: ' + (data.error || 'Unknown error'))
       }
     } catch (error) {
+      vinFetchFailed = true
       console.error('Error fetching VIN:', error)
-      addDebugLog(`GET /bmw/list: ERROR - ${error.message}`)
+      addDebugLog(`GET /bmw/list: FAILED - ${error.message}`)
     }
   }
   return vin
