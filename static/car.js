@@ -73,15 +73,18 @@ function driveToChart(element) {
   const chartHeightPx = canvas.height - paddingTop - paddingBottom
   let firstBarTopCanvas
 
-  if (firstPriceValue < 0) {
+  // Treat very small values near zero as zero to avoid jumps at the transition
+  const effectiveFirstPrice = Math.abs(firstPriceValue) < 0.01 ? 0 : firstPriceValue
+
+  if (effectiveFirstPrice < 0) {
     // Negative prices: car sits at baseline (where bars start extending downward)
     firstBarTopCanvas = paddingTop + chartHeightPx
-  } else if (firstPriceValue > maxPrice) {
+  } else if (effectiveFirstPrice > maxPrice) {
     // Overflow: bar at top
     firstBarTopCanvas = paddingTop
   } else {
     // Normal range: 0-maxPrice
-    const normalizedHeight = firstPriceValue / maxPrice
+    const normalizedHeight = effectiveFirstPrice / maxPrice
     firstBarTopCanvas = paddingTop + chartHeightPx * (1 - normalizedHeight)
   }
 
@@ -156,15 +159,18 @@ function driveToChart(element) {
 
       // Calculate Y position based on price (matching electricity chart logic)
       let barTopCanvas
-      if (priceValue < 0) {
+      // Treat very small values near zero as zero to avoid jumps at the transition
+      const effectivePrice = Math.abs(priceValue) < 0.01 ? 0 : priceValue
+
+      if (effectivePrice < 0) {
         // Negative prices: car sits at baseline (where bars start extending downward)
         barTopCanvas = paddingTop + chartHeightPx
-      } else if (priceValue > maxPrice) {
+      } else if (effectivePrice > maxPrice) {
         // Overflow: bar at top
         barTopCanvas = paddingTop
       } else {
         // Normal range: 0-maxPrice
-        const normalizedHeight = priceValue / maxPrice
+        const normalizedHeight = effectivePrice / maxPrice
         barTopCanvas = paddingTop + chartHeightPx * (1 - normalizedHeight)
       }
 
