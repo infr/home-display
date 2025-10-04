@@ -310,7 +310,7 @@ async function updateBMWStatus() {
     const vin = await initializeVIN()
     if (!vin) {
       hasConnection = false
-      addDebugLog(`POST /bmw/status: No VIN`)
+      addDebugLog(`[BMW] Status update skipped: No VIN available`)
     } else {
       try {
         const response = await fetch(`/bmw/status/${vin}`, { method: 'POST' })
