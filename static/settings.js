@@ -205,9 +205,12 @@ function toggleTestMode() {
     }
   }
 
-  // Update BMW status with test data
+  // Update BMW and Mitsubishi status with test data
   if (typeof updateBMWStatus === 'function') {
     updateBMWStatus()
+  }
+  if (typeof updateMitsubishiStatus === 'function') {
+    updateMitsubishiStatus()
   }
 }
 
