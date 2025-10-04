@@ -17,9 +17,9 @@ const ELECTRICITY_CONFIG = {
     overflow: '#9333ea',
     negative: '#06b6d4',
     current: '#3b82f6',
-    background: '#23272b',
-    text: '#ffffff',
-    grid: '#444'
+    background: '#f3f4f6',
+    text: '#1f2937',
+    grid: '#d1d5db'
   }
 }
 

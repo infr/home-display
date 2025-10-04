@@ -17,8 +17,9 @@
         width: 100%;
         display: flex;
         font-family: Arial, sans-serif;
-        background: #23272b;
-        color: #fff;
+        background: #f3f4f6;
+        color: #1f2937;
+        overflow: hidden;
       }
 
       .container {
@@ -29,11 +30,12 @@
 
       .sidebar {
         width: 33.33%;
-        background: #23272b;
+        background: #f3f4f6;
         border-radius: 8px;
         display: block;
         transition: background 0.5s ease;
         position: relative;
+        z-index: 10;
       }
 
       .car {
@@ -46,6 +48,7 @@
         border-radius: 0;
         box-shadow: none;
         padding: 0 0 10px 0;
+        border-bottom: 1px solid #d1d5db;
       }
 
       .car:last-child {
@@ -57,6 +60,8 @@
         border-radius: 8px;
         display: block;
         transform-origin: center center;
+        position: relative;
+        z-index: 1000;
       }
 
       .controls {
@@ -72,8 +77,8 @@
         width: 100%;
         aspect-ratio: 1 / 1;
         border-radius: 8px;
-        background-color: #23272b;
-        color: #fff;
+        background-color: transparent;
+        color: #1f2937;
         font-size: 22px;
         cursor: pointer;
         display: flex;
@@ -83,17 +88,16 @@
         margin: 0;
         padding: 0;
         box-shadow: none;
-        border: 1.5px solid #444;
+        border: none;
       }
       .control-button:hover,
       .control-button:active {
-        background: #1c69d4;
-        color: #fff;
-        border-color: #1c69d4;
+        background: #e5e7eb;
+        color: #1f2937;
       }
 
       .control-button i {
-        color: #fff;
+        color: #1f2937;
       }
 
       .control-button.success {
@@ -148,13 +152,16 @@
       .iframe-container {
         width: 66.66%;
         border: none;
-        background-color: #23272b;
+        background-color: #f3f4f6;
         border-radius: 8px;
         box-shadow: none;
         margin-left: 0;
         display: flex;
         align-items: center;
         justify-content: center;
+        overflow: hidden;
+        position: relative;
+        z-index: 1;
       }
 
       #electricityChart {
@@ -166,7 +173,7 @@
         font-family: Arial, sans-serif;
         font-size: 22px;
         font-weight: bold;
-        color: #fff;
+        color: #1f2937;
         text-align: center;
         padding: 12px;
       }
@@ -175,14 +182,14 @@
         padding: 5px;
         border-radius: 10px;
         font-size: 12px;
-        color: #fff;
+        color: #1f2937;
         display: flex;
         flex-direction: row;
         align-items: stretch;
         justify-content: center;
         gap: 4px;
         flex-wrap: nowrap;
-        background: #23272b;
+        background: #f3f4f6;
         box-shadow: none;
         margin-bottom: 10px;
         border: none;
@@ -345,6 +352,10 @@
         const firstBarTopCanvas = paddingTop + chartHeightPx * (1 - firstNormalizedHeight)
         const firstBarScreenY = chartRect.top + (firstBarTopCanvas / canvas.height) * chartRect.height - element.offsetHeight
 
+        // Track last position when leaving chart
+        let lastChartX = 0
+        let lastChartY = 0
+
         function animate() {
           const elapsed = Date.now() - startTime
           let progress = Math.min(elapsed / duration, 1)
@@ -451,16 +462,28 @@
 
             translateX = currentX - carRect.left
             translateY = targetScreenY - carRect.top
+
+            // Save position at end of chart phase for return
+            if (progress >= 0.84) {
+              lastChartX = translateX
+              lastChartY = translateY
+            }
           } else {
-            // Returning home - interpolate back
+            // Returning home - interpolate back from last chart position
             const returnProgress = (progress - 0.85) / 0.15
-            const lastX = chartAreaLeft - carRect.left
-            const lastY = firstBarScreenY - carRect.top
-            translateX = lastX * (1 - returnProgress)
-            translateY = lastY * (1 - returnProgress)
+            translateX = lastChartX * (1 - returnProgress)
+            translateY = lastChartY * (1 - returnProgress)
+
+            // Gradually reduce rotation to 0 as we return home
+            const deltaY = firstBarScreenY - carRect.top
+            const deltaX = chartAreaLeft - carRect.left
+            const initialRotation = Math.atan2(deltaY, deltaX * 0.5) * (180 / Math.PI)
+            const clampedInitialRotation = Math.max(-80, Math.min(80, initialRotation))
+
+            // Keep same rotation direction but fade to 0
+            const targetRotation = clampedInitialRotation * (1 - returnProgress)
 
             // Smoothly return rotation to 0
-            const targetRotation = 0
             rotationHistory.push(targetRotation)
             if (rotationHistory.length > 20) rotationHistory.shift()
             rotation = rotationHistory.reduce((a, b) => a + b, 0) / rotationHistory.length
