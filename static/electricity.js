@@ -76,6 +76,10 @@ async function fetchElectricityPrices() {
     const response = await fetch(url)
     const data = await response.json()
 
+    if (typeof addDebugLog === 'function') {
+      addDebugLog(`GET /electricity: ${response.status} - ${data.prices ? data.prices.length + ' prices' : 'no data'}`)
+    }
+
     if (data && data.prices) {
       priceData = data.prices
       updateCurrentPriceIndex()
@@ -85,7 +89,7 @@ async function fetchElectricityPrices() {
     console.error('Error fetching electricity prices:', error)
     showError('Unable to load electricity prices')
     if (typeof addDebugLog === 'function') {
-      addDebugLog(`[Electricity] Fetch error: ${error.message}`)
+      addDebugLog(`GET /electricity: ERROR - ${error.message}`)
     }
   }
 }

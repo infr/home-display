@@ -1054,6 +1054,7 @@
           try {
             const response = await fetch('/bmw/list')
             const data = await response.json()
+            addDebugLog(`GET /bmw/list: ${response.status} - ${JSON.stringify(data).substring(0, 100)}`)
 
             if (data && data.output) {
               const match = data.output.match(/\((\w+)\)/)
@@ -1067,7 +1068,7 @@
             }
           } catch (error) {
             console.error('Error fetching VIN:', error)
-            addDebugLog(`[BMW] VIN fetch error: ${error.message}`)
+            addDebugLog(`GET /bmw/list: ERROR - ${error.message}`)
           }
         }
         return vin
@@ -1090,14 +1091,17 @@
             isLocked = Math.random() > 0.5
             isCharging = batteryLevel < 80 && Math.random() > 0.6
           }
+          addDebugLog(`POST /bmw/status: TEST MODE`)
         } else {
           const vin = await initializeVIN()
           if (!vin) {
             hasConnection = false
+            addDebugLog(`POST /bmw/status: No VIN`)
           } else {
             try {
               const response = await fetch(`/bmw/status/${vin}`, { method: 'POST' })
               const data = await response.json()
+              addDebugLog(`POST /bmw/status: ${response.status} - ${JSON.stringify(data).substring(0, 100)}`)
 
               if (data.status === 'success' && data.output) {
                 hasConnection = true
@@ -1121,7 +1125,7 @@
               }
             } catch (error) {
               console.error('Error fetching BMW status:', error)
-              addDebugLog(`[BMW] Status fetch error: ${error.message}`)
+              addDebugLog(`POST /bmw/status: ERROR - ${error.message}`)
               hasConnection = false
             }
           }
@@ -1193,15 +1197,19 @@
         initializeVIN().then(vin => {
           if (!vin) {
             console.error('VIN is missing. Unable to proceed with command.')
+            addDebugLog(`POST /bmw/${command}: No VIN`)
             return
           }
 
           button.classList.add('spin')
 
           fetch(`/bmw/${command}/${vin}`, { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
+            .then(response => {
+              return response.json().then(data => ({ status: response.status, data }))
+            })
+            .then(({ status, data }) => {
               button.classList.remove('spin')
+              addDebugLog(`POST /bmw/${command}: ${status} - ${JSON.stringify(data).substring(0, 100)}`)
               if (data.status === 'success') {
                 setButtonState(button, 'success')
                 // Refresh status after lock/unlock commands
@@ -1210,13 +1218,12 @@
                 }
               } else {
                 setButtonState(button, 'error')
-                addDebugLog(`[BMW] Command failed: ${JSON.stringify(data, null, 2)}`)
               }
             })
             .catch(error => {
               button.classList.remove('spin')
               setButtonState(button, 'error')
-              addDebugLog(`[BMW] Error: ${error.message}`)
+              addDebugLog(`POST /bmw/${command}: ERROR - ${error.message}`)
             })
         })
       }
@@ -1225,20 +1232,22 @@
         button.classList.add('spin')
 
         fetch(`/outlander/${command}`, { method: 'POST' })
-          .then(response => response.json())
-          .then(data => {
+          .then(response => {
+            return response.json().then(data => ({ status: response.status, data }))
+          })
+          .then(({ status, data }) => {
             button.classList.remove('spin')
+            addDebugLog(`POST /outlander/${command}: ${status} - ${JSON.stringify(data).substring(0, 100)}`)
             if (data.status === 'success') {
               setButtonState(button, 'success')
             } else {
               setButtonState(button, 'error')
-              addDebugLog(`[Outlander] Command failed: ${JSON.stringify(data, null, 2)}`)
             }
           })
           .catch(error => {
             button.classList.remove('spin')
             setButtonState(button, 'error')
-            addDebugLog(`[Outlander] Error: ${error.message}`)
+            addDebugLog(`POST /outlander/${command}: ERROR - ${error.message}`)
           })
       }
 
@@ -1266,6 +1275,7 @@
         try {
           const response = await fetch(url)
           const data = await response.json()
+          addDebugLog(`GET /weather: ${response.status}`)
           if (!data.daily) return
           const days = data.daily
           const weatherCodes = days.weathercode
@@ -1302,7 +1312,7 @@
           document.getElementById('weather').innerHTML = html
         } catch (e) {
           document.getElementById('weather').innerHTML = '<span style="color:#a00">Weather unavailable</span>'
-          addDebugLog(`[Weather] Fetch error: ${e.message}`)
+          addDebugLog(`GET /weather: ERROR - ${e.message}`)
         }
       }
 
