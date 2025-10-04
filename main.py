@@ -70,6 +70,11 @@ async def control_bmw(command: str, vin: str):
 
     result = execute_command(cmd, check_output=check_output)
     print(f"Result from execute_command: {result}")
+
+    # Return proper HTTP error code if command failed
+    if result.get("status") == "failed":
+        raise HTTPException(status_code=500, detail=result)
+
     return result
 
 @app.get("/bmw/list")
@@ -79,6 +84,11 @@ async def list_vehicles():
     print("Logged in successfully. Executing 'bmw list' command.")
     result = execute_command(["bmw", "list"], check_output=False)
     print(f"Result from list command: {result}")
+
+    # Return proper HTTP error code if command failed
+    if result.get("status") == "failed":
+        raise HTTPException(status_code=500, detail=result)
+
     return result
     
 @app.get("/mitsubishi/status")

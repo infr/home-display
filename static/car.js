@@ -251,6 +251,15 @@ async function initializeVIN() {
     console.log('VIN not found in localStorage. Fetching VIN from API...')
     try {
       const response = await fetch('/bmw/list')
+
+      // Handle HTTP errors (500, 404, etc.)
+      if (!response.ok) {
+        vinFetchFailed = true
+        const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }))
+        addDebugLog(`GET /bmw/list: ${response.status} - FAILED`)
+        throw new Error(`HTTP ${response.status}: ${errorData.detail || 'Server error'}`)
+      }
+
       const data = await response.json()
       addDebugLog(`GET /bmw/list: ${response.status} - ${JSON.stringify(data).substring(0, 100)}`)
 
@@ -268,7 +277,7 @@ async function initializeVIN() {
         }
       } else {
         vinFetchFailed = true
-        throw new Error('BMW list API failed: ' + (data.error || 'Unknown error'))
+        throw new Error('BMW list API returned failed status')
       }
     } catch (error) {
       vinFetchFailed = true
