@@ -471,12 +471,10 @@ function setButtonState(button, state) {
 // Initialize BMW status on load and update every 5 minutes
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
-    initializeVIN()
     updateBMWStatus()
     setInterval(updateBMWStatus, 5 * 60 * 1000)
   })
 } else {
-  initializeVIN()
   updateBMWStatus()
   setInterval(updateBMWStatus, 5 * 60 * 1000)
 }
