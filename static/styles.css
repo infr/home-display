@@ -401,7 +401,8 @@ html {
   align-items: flex-start;
 }
 
-#bmwStatusInfo {
+#bmwStatusInfo,
+#mitsubishiStatusInfo {
   display: flex;
   flex-direction: column;
   gap: 4px;
