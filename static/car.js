@@ -73,8 +73,8 @@ function driveToChart(element) {
   const chartHeightPx = canvas.height - paddingTop - paddingBottom
   let firstBarTopCanvas
 
-  // Treat very small values near zero as zero to avoid jumps at the transition
-  const effectiveFirstPrice = Math.abs(firstPriceValue) < 0.01 ? 0 : firstPriceValue
+  // Treat very small negative values as zero to avoid jumps at negative/zero boundary
+  const effectiveFirstPrice = (firstPriceValue < 0 && firstPriceValue > -0.005) ? 0 : firstPriceValue
 
   if (effectiveFirstPrice < 0) {
     // Negative prices: car sits at baseline (where bars start extending downward)
@@ -159,8 +159,8 @@ function driveToChart(element) {
 
       // Calculate Y position based on price (matching electricity chart logic)
       let barTopCanvas
-      // Treat very small values near zero as zero to avoid jumps at the transition
-      const effectivePrice = Math.abs(priceValue) < 0.01 ? 0 : priceValue
+      // Treat very small negative values as zero to avoid jumps at negative/zero boundary
+      const effectivePrice = (priceValue < 0 && priceValue > -0.005) ? 0 : priceValue
 
       if (effectivePrice < 0) {
         // Negative prices: car sits at baseline (where bars start extending downward)
