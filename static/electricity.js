@@ -20,7 +20,8 @@ const ELECTRICITY_CONFIG = {
     background: '#f3f4f6',
     text: '#1f2937',
     grid: '#d1d5db'
-  }
+  },
+  testMode: false
 }
 
 let electricityChart = null
@@ -28,6 +29,40 @@ let priceData = []
 let currentPriceIndex = -1
 
 async function fetchElectricityPrices() {
+  // Check if test mode is enabled
+  if (ELECTRICITY_CONFIG.testMode) {
+    const now = new Date()
+    const testData = []
+
+    // Generate trend-based random data with normal distribution 0-20c
+    let currentValue = Math.random() * 20 // Start with value between 0-20
+
+    for (let i = 0; i < 96; i++) {
+      const date = new Date(now.getTime() + i * 15 * 60 * 1000)
+
+      // Add random variation (-3 to +3)
+      const variation = (Math.random() - 0.5) * 6
+      currentValue = currentValue + variation
+
+      // Bias towards 0-20 range (pull back if too far out)
+      if (currentValue > 25) {
+        currentValue -= 4
+      } else if (currentValue < 5) {
+        currentValue += 2
+      }
+
+      // Clamp to range -1 to +60
+      currentValue = Math.max(-1, Math.min(60, currentValue))
+
+      testData.push({ date: date.toISOString(), value: currentValue })
+    }
+
+    priceData = testData
+    updateCurrentPriceIndex()
+    renderElectricityChart()
+    return
+  }
+
   try {
     const now = new Date()
     const start = new Date(now)

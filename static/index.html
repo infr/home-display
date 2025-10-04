@@ -11,14 +11,36 @@
         box-sizing: border-box;
       }
 
+      :root {
+        --bg-color: #f3f4f6;
+        --text-color: #1f2937;
+        --border-color: #d1d5db;
+        --input-bg: #ffffff;
+        --sidebar-bg: #f3f4f6;
+        --chart-bg: #f3f4f6;
+        --chart-text: #1f2937;
+        --chart-grid: #d1d5db;
+      }
+
+      :root.dark-mode {
+        --bg-color: #1f2937;
+        --text-color: #f3f4f6;
+        --border-color: #4b5563;
+        --input-bg: #374151;
+        --sidebar-bg: #1f2937;
+        --chart-bg: #1f2937;
+        --chart-text: #f3f4f6;
+        --chart-grid: #4b5563;
+      }
+
       body,
       html {
         height: 100%;
         width: 100%;
         display: flex;
         font-family: Arial, sans-serif;
-        background: #f3f4f6;
-        color: #1f2937;
+        background: var(--bg-color);
+        color: var(--text-color);
         overflow: hidden;
       }
 
@@ -30,7 +52,7 @@
 
       .sidebar {
         width: 33.33%;
-        background: #f3f4f6;
+        background: var(--sidebar-bg);
         border-radius: 8px;
         display: block;
         transition: background 0.5s ease;
@@ -48,7 +70,7 @@
         border-radius: 0;
         box-shadow: none;
         padding: 0 0 10px 0;
-        border-bottom: 1px solid #d1d5db;
+        border-bottom: 1px solid var(--border-color);
       }
 
       .car:last-child {
@@ -78,7 +100,7 @@
         aspect-ratio: 1 / 1;
         border-radius: 8px;
         background-color: transparent;
-        color: #1f2937;
+        color: var(--text-color);
         font-size: 22px;
         cursor: pointer;
         display: flex;
@@ -92,12 +114,12 @@
       }
       .control-button:hover,
       .control-button:active {
-        background: #e5e7eb;
-        color: #1f2937;
+        background: var(--border-color);
+        color: var(--text-color);
       }
 
       .control-button i {
-        color: #1f2937;
+        color: var(--text-color);
       }
 
       .control-button.success {
@@ -152,7 +174,7 @@
       .iframe-container {
         width: 66.66%;
         border: none;
-        background-color: #f3f4f6;
+        background-color: var(--chart-bg);
         border-radius: 8px;
         box-shadow: none;
         margin-left: 0;
@@ -169,11 +191,111 @@
         height: 100%;
       }
 
+      .test-mode-indicator {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(239, 68, 68, 0.8);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 14px;
+        z-index: 10;
+        display: none;
+      }
+
+      .test-mode-indicator.active {
+        display: block;
+      }
+
+      .settings-button {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        font-size: 24px;
+        cursor: pointer;
+        z-index: 1000;
+        background: transparent;
+        border: none;
+        padding: 5px;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+
+      .modal-content {
+        background-color: var(--bg-color);
+        margin: 10% auto;
+        padding: 30px;
+        border-radius: 8px;
+        width: 400px;
+        max-width: 90%;
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .modal-header h2 {
+        margin: 0;
+        color: var(--text-color);
+      }
+
+      .close {
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        color: var(--text-color);
+      }
+
+      .setting-item {
+        margin-bottom: 20px;
+      }
+
+      .setting-item label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--text-color);
+        font-weight: bold;
+      }
+
+      .setting-item input[type="number"] {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background: var(--input-bg);
+        color: var(--text-color);
+      }
+
+      .toggle {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .toggle input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+      }
+
       .clock {
         font-family: Arial, sans-serif;
         font-size: 22px;
         font-weight: bold;
-        color: #1f2937;
+        color: var(--text-color);
         text-align: center;
         padding: 12px;
       }
@@ -182,21 +304,21 @@
         padding: 5px;
         border-radius: 10px;
         font-size: 12px;
-        color: #1f2937;
+        color: var(--text-color);
         display: flex;
         flex-direction: row;
         align-items: stretch;
         justify-content: center;
         gap: 4px;
         flex-wrap: nowrap;
-        background: #f3f4f6;
+        background: var(--sidebar-bg);
         box-shadow: none;
         margin-bottom: 10px;
         border: none;
       }
       .weather-card {
-        background: #ffffff;
-        color: #000;
+        background: var(--input-bg);
+        color: var(--text-color);
         border-radius: 6px;
         box-shadow: none;
         padding: 4px 4px 2px 4px;
@@ -212,7 +334,7 @@
       .weather-day {
         text-align: center;
         font-size: 11px;
-        color: #666;
+        color: var(--text-color);
         margin-bottom: 1px;
         font-weight: bold;
       }
@@ -225,14 +347,15 @@
         text-align: center;
         font-size: 12px;
         font-family: monospace;
-        color: #000;
+        color: var(--text-color);
       }
       .weather-high {
         font-weight: bold;
-        color: #000;
+        color: var(--text-color);
       }
       .weather-low {
-        color: #666;
+        color: var(--text-color);
+        opacity: 0.7;
         margin-left: 2px;
       }
 
@@ -281,9 +404,40 @@
 
       <!-- External Content Column (2/3) -->
       <div class="iframe-container" id="electricity-container">
+        <div class="test-mode-indicator" id="testModeIndicator">TEST MODE</div>
         <canvas id="electricityChart"></canvas>
       </div>
     </div>
+
+    <!-- Settings Button -->
+    <button class="settings-button" onclick="openSettings()">⚙️</button>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Settings</h2>
+          <span class="close" onclick="closeSettings()">&times;</span>
+        </div>
+        <div class="setting-item">
+          <label class="toggle">
+            <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()">
+            <span>Dark Mode</span>
+          </label>
+        </div>
+        <div class="setting-item">
+          <label for="maxValue">Max Price Value (c/kWh)</label>
+          <input type="number" id="maxValue" value="30" min="10" max="100" onchange="updateMaxValue()">
+        </div>
+        <div class="setting-item">
+          <label class="toggle">
+            <input type="checkbox" id="testModeToggle" onchange="toggleTestMode()">
+            <span>Test Mode (Random Data)</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
     <script src="electricity.js"></script>
 
     <script>
@@ -334,7 +488,22 @@
         }).slice(0, 96)
 
         const minPrice = 0
-        const maxPrice = 30
+        const maxPrice = ELECTRICITY_CONFIG?.priceScale?.max || 30
+
+        // Pre-calculate smoothed price values for performance
+        const smoothedPrices = []
+        for (let i = 0; i < dataToShow.length; i++) {
+          const startIdx = Math.max(0, i - 3)
+          const endIdx = Math.min(dataToShow.length - 1, i + 3)
+          let sum = 0
+          let count = 0
+          for (let j = startIdx; j <= endIdx; j++) {
+            sum += dataToShow[j]?.value || 15
+            count++
+          }
+          smoothedPrices.push(sum / count)
+        }
+
         const yHistory = []
         const rotationHistory = []
 
@@ -404,26 +573,20 @@
 
             // Smooth rotation on the way to first bar
             rotationHistory.push(currentRotation)
-            if (rotationHistory.length > 20) rotationHistory.shift()
-            rotation = rotationHistory.reduce((a, b) => a + b, 0) / rotationHistory.length
+            if (rotationHistory.length > 12) rotationHistory.shift()
+            let rotSum = 0
+            for (let i = 0; i < rotationHistory.length; i++) {
+              rotSum += rotationHistory[i]
+            }
+            rotation = rotSum / rotationHistory.length
           } else if (phase === 'onChart') {
             // On chart - follow the data
             const chartWidth = chartAreaRight - chartAreaLeft - element.offsetWidth
             const currentX = chartAreaLeft + chartWidth * xProgress
 
-            // Map xProgress to data index and sample surrounding data for smoothing
-            const exactIndex = xProgress * (dataToShow.length - 1)
-            const startIndex = Math.max(0, Math.floor(exactIndex) - 5)
-            const endIndex = Math.min(dataToShow.length - 1, Math.ceil(exactIndex) + 5)
-
-            // Get average price around current position for smoothing
-            let priceSum = 0
-            let priceCount = 0
-            for (let i = startIndex; i <= endIndex; i++) {
-              priceSum += dataToShow[i]?.value || 15
-              priceCount++
-            }
-            const priceValue = priceSum / priceCount
+            // Use pre-calculated smoothed price
+            const dataIndex = Math.floor(xProgress * (smoothedPrices.length - 1))
+            const priceValue = smoothedPrices[dataIndex] || 15
 
             // Calculate Y position based on price
             let normalizedHeight
@@ -437,25 +600,32 @@
 
             const barTopCanvas = paddingTop + chartHeightPx * (1 - normalizedHeight)
 
-            // Smooth the Y position
+            // Smooth the Y position (reduced window for better performance)
             yHistory.push(barTopCanvas)
-            if (yHistory.length > 25) yHistory.shift()
-            const smoothY = yHistory.reduce((a, b) => a + b, 0) / yHistory.length
+            if (yHistory.length > 15) yHistory.shift()
+
+            // Simple average using stored sum for performance
+            let ySum = 0
+            for (let i = 0; i < yHistory.length; i++) {
+              ySum += yHistory[i]
+            }
+            const smoothY = ySum / yHistory.length
 
             // Calculate rotation based on Y change
-            if (yHistory.length >= 15) {
-              const recent = yHistory.slice(-15)
-              const yChange = recent[recent.length - 1] - recent[0]
-              // Positive yChange means going down (higher Y), negative means going up
-              // When going backwards (direction = -1), invert the rotation
+            if (yHistory.length >= 10) {
+              const yChange = yHistory[yHistory.length - 1] - yHistory[yHistory.length - 10]
               rotation = Math.atan2(yChange * direction, 20) * (180 / Math.PI)
               rotation = Math.max(-80, Math.min(80, rotation))
             }
 
-            // Smooth rotation
+            // Smooth rotation (reduced window for better performance)
             rotationHistory.push(rotation)
-            if (rotationHistory.length > 20) rotationHistory.shift()
-            rotation = rotationHistory.reduce((a, b) => a + b, 0) / rotationHistory.length
+            if (rotationHistory.length > 12) rotationHistory.shift()
+            let rotSum = 0
+            for (let i = 0; i < rotationHistory.length; i++) {
+              rotSum += rotationHistory[i]
+            }
+            rotation = rotSum / rotationHistory.length
 
             // Convert canvas Y to screen Y
             const targetScreenY = chartRect.top + (smoothY / canvas.height) * chartRect.height - element.offsetHeight
@@ -485,8 +655,12 @@
 
             // Smoothly return rotation to 0
             rotationHistory.push(targetRotation)
-            if (rotationHistory.length > 20) rotationHistory.shift()
-            rotation = rotationHistory.reduce((a, b) => a + b, 0) / rotationHistory.length
+            if (rotationHistory.length > 12) rotationHistory.shift()
+            let rotSum = 0
+            for (let i = 0; i < rotationHistory.length; i++) {
+              rotSum += rotationHistory[i]
+            }
+            rotation = rotSum / rotationHistory.length
           }
 
           element.style.transform = `translate(${translateX}px, ${translateY}px) rotate(${rotation}deg)`
@@ -501,6 +675,106 @@
 
         animate()
       }
+
+      // Settings management
+      function loadSettings() {
+        const darkMode = localStorage.getItem('darkMode') === 'true'
+        const maxValue = parseInt(localStorage.getItem('maxValue')) || 30
+        const testMode = localStorage.getItem('testMode') === 'true'
+
+        if (darkMode) {
+          document.documentElement.classList.add('dark-mode')
+          document.getElementById('darkModeToggle').checked = true
+        }
+        document.getElementById('maxValue').value = maxValue
+        document.getElementById('testModeToggle').checked = testMode
+
+        // Show/hide test mode indicator
+        const indicator = document.getElementById('testModeIndicator')
+        if (testMode) {
+          indicator.classList.add('active')
+        } else {
+          indicator.classList.remove('active')
+        }
+
+        // Update electricity config with colors
+        if (typeof ELECTRICITY_CONFIG !== 'undefined') {
+          ELECTRICITY_CONFIG.priceScale.max = maxValue
+          ELECTRICITY_CONFIG.testMode = testMode
+          ELECTRICITY_CONFIG.colors.background = darkMode ? '#1f2937' : '#f3f4f6'
+          ELECTRICITY_CONFIG.colors.text = darkMode ? '#f3f4f6' : '#1f2937'
+          ELECTRICITY_CONFIG.colors.grid = darkMode ? '#4b5563' : '#d1d5db'
+        }
+      }
+
+      function openSettings() {
+        document.getElementById('settingsModal').style.display = 'block'
+      }
+
+      function closeSettings() {
+        document.getElementById('settingsModal').style.display = 'none'
+      }
+
+      function toggleDarkMode() {
+        const isDark = document.getElementById('darkModeToggle').checked
+        localStorage.setItem('darkMode', isDark)
+        if (isDark) {
+          document.documentElement.classList.add('dark-mode')
+        } else {
+          document.documentElement.classList.remove('dark-mode')
+        }
+        // Update chart colors
+        if (typeof ELECTRICITY_CONFIG !== 'undefined') {
+          ELECTRICITY_CONFIG.colors.background = isDark ? '#1f2937' : '#f3f4f6'
+          ELECTRICITY_CONFIG.colors.text = isDark ? '#f3f4f6' : '#1f2937'
+          ELECTRICITY_CONFIG.colors.grid = isDark ? '#4b5563' : '#d1d5db'
+          if (typeof renderElectricityChart === 'function') {
+            renderElectricityChart()
+          }
+        }
+      }
+
+      function updateMaxValue() {
+        const maxValue = parseInt(document.getElementById('maxValue').value)
+        localStorage.setItem('maxValue', maxValue)
+        if (typeof ELECTRICITY_CONFIG !== 'undefined') {
+          ELECTRICITY_CONFIG.priceScale.max = maxValue
+          if (typeof renderElectricityChart === 'function') {
+            renderElectricityChart()
+          }
+        }
+      }
+
+      function toggleTestMode() {
+        const testMode = document.getElementById('testModeToggle').checked
+        localStorage.setItem('testMode', testMode)
+
+        // Show/hide test mode indicator
+        const indicator = document.getElementById('testModeIndicator')
+        if (testMode) {
+          indicator.classList.add('active')
+        } else {
+          indicator.classList.remove('active')
+        }
+
+        if (typeof ELECTRICITY_CONFIG !== 'undefined') {
+          ELECTRICITY_CONFIG.testMode = testMode
+          if (typeof fetchElectricityPrices === 'function') {
+            fetchElectricityPrices()
+          }
+        }
+      }
+
+      // Close modal when clicking outside
+      window.onclick = function(event) {
+        const modal = document.getElementById('settingsModal')
+        if (event.target === modal) {
+          closeSettings()
+        }
+      }
+
+      // Load settings on page load
+      loadSettings()
 
       function updateClock() {
         const clockElement = document.getElementById('clock')
