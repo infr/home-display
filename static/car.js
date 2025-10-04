@@ -73,10 +73,8 @@ function driveToChart(element) {
   let firstBarTopCanvas
 
   if (firstPriceValue < 0) {
-    // Negative prices: bars extend downward from baseline
-    const baselineCanvas = paddingTop + chartHeightPx
-    const negativeBarHeight = Math.min(Math.abs(firstPriceValue / maxPrice) * chartHeightPx, 30)
-    firstBarTopCanvas = baselineCanvas + negativeBarHeight
+    // Negative prices: car sits at baseline (where bars start extending downward)
+    firstBarTopCanvas = paddingTop + chartHeightPx
   } else if (firstPriceValue > maxPrice) {
     // Overflow: bar at top
     firstBarTopCanvas = paddingTop
@@ -158,10 +156,8 @@ function driveToChart(element) {
       // Calculate Y position based on price (matching electricity chart logic)
       let barTopCanvas
       if (priceValue < 0) {
-        // Negative prices: bars extend downward from baseline
-        const baselineCanvas = paddingTop + chartHeightPx
-        const negativeBarHeight = Math.min(Math.abs(priceValue / maxPrice) * chartHeightPx, 30)
-        barTopCanvas = baselineCanvas + negativeBarHeight
+        // Negative prices: car sits at baseline (where bars start extending downward)
+        barTopCanvas = paddingTop + chartHeightPx
       } else if (priceValue > maxPrice) {
         // Overflow: bar at top
         barTopCanvas = paddingTop
