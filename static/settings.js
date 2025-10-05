@@ -117,8 +117,8 @@ async function killBrowser() {
       addDebugLog(`POST /api/kill-browser: ${response.status}`)
 
       if (!response.ok) {
-        const text = await response.text()
-        addDebugLog(`POST /api/kill-browser: ERROR - ${text}`)
+        const data = await response.json()
+        addDebugLog(`POST /api/kill-browser: ERROR - ${data.error || data.detail?.error || 'Unknown error'}`)
         return
       }
 
@@ -136,8 +136,8 @@ async function updateApp() {
       addDebugLog(`POST /api/update: ${response.status}`)
 
       if (!response.ok) {
-        const text = await response.text()
-        addDebugLog(`POST /api/update: ERROR - ${text}`)
+        const data = await response.json()
+        addDebugLog(`POST /api/update: ERROR - ${data.error || data.detail?.error || 'Unknown error'}`)
         return
       }
 
@@ -186,8 +186,8 @@ async function rebootSystem() {
       addDebugLog(`POST /api/reboot: ${response.status}`)
 
       if (!response.ok) {
-        const text = await response.text()
-        addDebugLog(`POST /api/reboot: ERROR - ${text}`)
+        const data = await response.json()
+        addDebugLog(`POST /api/reboot: ERROR - ${data.error || data.detail?.error || 'Unknown error'}`)
         return
       }
 
