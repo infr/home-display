@@ -24,7 +24,8 @@ const ELECTRICITY_CONFIG = {
   },
   testMode: false,
   chargingHours: 6, // Default hours needed per day (BMW 330e/Outlander PHEV Schuko charging)
-  veryLowPriceThreshold: 2 // c/kWh - if all prices under this, show all as optimal
+  veryLowPriceThreshold: 2, // c/kWh - if all prices under this, show all as optimal
+  maxChargingPrice: 10 // c/kWh - don't highlight hours above this price
 }
 
 let electricityChart = null
@@ -54,11 +55,14 @@ function findOptimalChargingHours(data, hoursNeeded) {
   Object.values(dayGroups).forEach(dayData => {
     if (dayData.length === 0) return
 
-    // Sort by price to find cheapest quarters
-    const sorted = [...dayData].sort((a, b) => a.value - b.value)
+    // Filter to only include hours below max price threshold
+    const affordableHours = dayData.filter(p => p.value <= ELECTRICITY_CONFIG.maxChargingPrice)
 
-    // Take the cheapest N quarters
-    const cheapestQuarters = sorted.slice(0, Math.min(quartersNeeded, dayData.length))
+    // Sort by price to find cheapest quarters
+    const sorted = [...affordableHours].sort((a, b) => a.value - b.value)
+
+    // Take the cheapest N quarters (or all if fewer than needed)
+    const cheapestQuarters = sorted.slice(0, Math.min(quartersNeeded, sorted.length))
 
     // Add their original indices
     cheapestQuarters.forEach(quarter => {
