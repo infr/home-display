@@ -103,10 +103,7 @@
     <!-- Settings Modal -->
     <div id="settingsModal" class="modal">
       <div class="modal-content">
-        <div class="modal-header">
-          <h2>Settings</h2>
-          <span class="close" onclick="closeSettings()">&times;</span>
-        </div>
+        <span class="close" onclick="closeSettings()">&times;</span>
         <div class="modal-body">
           <div class="modal-column">
             <div class="setting-item">
@@ -136,13 +133,25 @@
               </label>
             </div>
             <div class="setting-item">
-              <button onclick="resetSettings()" style="padding: 8px 16px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-color); cursor: pointer; width: 100%;">Reset All Settings</button>
+              <label class="toggle">
+                <input type="checkbox" id="disableBMWToggle" onchange="toggleDisableBMW()">
+                <span>Disable BMW</span>
+              </label>
+            </div>
+            <div class="setting-item">
+              <label class="toggle">
+                <input type="checkbox" id="disableMitsubishiToggle" onchange="toggleDisableMitsubishi()">
+                <span>Disable Mitsubishi</span>
+              </label>
+            </div>
+            <div class="setting-item">
+              <button onclick="resetSettings()" style="padding: 6px 12px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-color); cursor: pointer; width: 100%; font-size: 11px;">Reset All Settings</button>
             </div>
           </div>
           <div class="modal-column logs">
             <div class="setting-item">
-              <textarea id="output" readonly rows="15" placeholder="Debug logs (last 10 entries)"></textarea>
-              <button onclick="clearDebugLogs()" style="margin-top: 8px; padding: 8px 16px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-color); cursor: pointer;">Clear Log</button>
+              <div id="output" class="log-output"></div>
+              <button onclick="clearDebugLogs()" style="margin-top: 4px; padding: 6px 12px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-color); cursor: pointer; font-size: 11px;">Clear Log</button>
             </div>
           </div>
         </div>

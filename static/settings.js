@@ -1,9 +1,16 @@
 // Settings and debug logging management
 
+// Generate session ID on page load
+const SESSION_ID = Math.random().toString(36).substring(2, 15)
+
 // Debug logging to localStorage
 function addDebugLog(message) {
   const timestamp = new Date().toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-  const logEntry = `[${timestamp}] ${message}`
+  const logEntry = {
+    sessionId: SESSION_ID,
+    timestamp: timestamp,
+    message: message
+  }
 
   // Get existing logs from localStorage
   let logs = []
@@ -19,9 +26,9 @@ function addDebugLog(message) {
   // Add new log
   logs.push(logEntry)
 
-  // Keep only last 10 logs
-  if (logs.length > 10) {
-    logs = logs.slice(-10)
+  // Keep only last 20 logs
+  if (logs.length > 20) {
+    logs = logs.slice(-20)
   }
 
   // Save back to localStorage
@@ -31,33 +38,36 @@ function addDebugLog(message) {
     console.error('Error saving debug logs:', e)
   }
 
-  // Update textarea if it exists
+  // Update output if it exists
+  updateLogDisplay()
+}
+
+function updateLogDisplay() {
   const output = document.getElementById('output')
   if (output) {
-    output.value = logs.join('\n')
+    const stored = localStorage.getItem('debugLogs')
+    if (stored) {
+      const logs = JSON.parse(stored)
+      output.innerHTML = logs.map(log => {
+        const isOld = log.sessionId !== SESSION_ID
+        const cssClass = isOld ? 'log-old' : ''
+        return `<div class="${cssClass}">[${log.timestamp}] ${log.message}</div>`
+      }).join('')
+      // Auto-scroll to bottom
+      output.scrollTop = output.scrollHeight
+    }
   }
 }
 
 function loadDebugLogs() {
-  try {
-    const stored = localStorage.getItem('debugLogs')
-    if (stored) {
-      const logs = JSON.parse(stored)
-      const output = document.getElementById('output')
-      if (output) {
-        output.value = logs.join('\n')
-      }
-    }
-  } catch (e) {
-    console.error('Error loading debug logs:', e)
-  }
+  updateLogDisplay()
 }
 
 function clearDebugLogs() {
   localStorage.removeItem('debugLogs')
   const output = document.getElementById('output')
   if (output) {
-    output.value = ''
+    output.innerHTML = ''
   }
 }
 
@@ -80,6 +90,8 @@ function resetSettings() {
     localStorage.removeItem('carStatusInterval')
     localStorage.removeItem('weatherInterval')
     localStorage.removeItem('testMode')
+    localStorage.removeItem('disableBMW')
+    localStorage.removeItem('disableMitsubishi')
     localStorage.removeItem('bmw_vin')
     location.reload()
   }
@@ -116,12 +128,16 @@ function loadSettings() {
   const carStatusInterval = parseInt(localStorage.getItem('carStatusInterval')) || 5
   const weatherInterval = parseInt(localStorage.getItem('weatherInterval')) || 15
   const testMode = localStorage.getItem('testMode') === 'true'
+  const disableBMW = localStorage.getItem('disableBMW') === 'true'
+  const disableMitsubishi = localStorage.getItem('disableMitsubishi') === 'true'
 
   document.getElementById('darkModeSelect').value = themeMode
   document.getElementById('maxValue').value = maxValue
   document.getElementById('carStatusInterval').value = carStatusInterval
   document.getElementById('weatherInterval').value = weatherInterval
   document.getElementById('testModeToggle').checked = testMode
+  document.getElementById('disableBMWToggle').checked = disableBMW
+  document.getElementById('disableMitsubishiToggle').checked = disableMitsubishi
 
   // Apply theme based on mode
   if (themeMode === 'dark') {
@@ -209,6 +225,24 @@ function toggleTestMode() {
   if (typeof updateBMWStatus === 'function') {
     updateBMWStatus()
   }
+  if (typeof updateMitsubishiStatus === 'function') {
+    updateMitsubishiStatus()
+  }
+}
+
+function toggleDisableBMW() {
+  const disabled = document.getElementById('disableBMWToggle').checked
+  localStorage.setItem('disableBMW', disabled)
+
+  if (typeof updateBMWStatus === 'function') {
+    updateBMWStatus()
+  }
+}
+
+function toggleDisableMitsubishi() {
+  const disabled = document.getElementById('disableMitsubishiToggle').checked
+  localStorage.setItem('disableMitsubishi', disabled)
+
   if (typeof updateMitsubishiStatus === 'function') {
     updateMitsubishiStatus()
   }

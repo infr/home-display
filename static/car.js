@@ -352,6 +352,23 @@ async function initializeVIN() {
 }
 
 async function updateBMWStatus() {
+  // Check if BMW is disabled
+  const disabled = localStorage.getItem('disableBMW') === 'true'
+
+  const connectionBadge = document.getElementById('bmwConnection')
+  const statusInfo = document.getElementById('bmwStatusInfo')
+  const connectionText = connectionBadge.querySelector('.connection-text')
+  const infoPanel = document.getElementById('bmwPanel')
+
+  if (disabled) {
+    connectionBadge.classList.add('disconnected')
+    connectionBadge.classList.remove('error')
+    connectionText.textContent = 'Disabled'
+    statusInfo.style.display = 'none'
+    infoPanel.classList.add('offline')
+    return
+  }
+
   // Check if test mode is enabled
   const testMode = localStorage.getItem('testMode') === 'true'
 
@@ -406,12 +423,6 @@ async function updateBMWStatus() {
       }
     }
   }
-
-  // Update connection status
-  const connectionBadge = document.getElementById('bmwConnection')
-  const statusInfo = document.getElementById('bmwStatusInfo')
-  const connectionText = connectionBadge.querySelector('.connection-text')
-  const infoPanel = document.getElementById('bmwPanel')
 
   if (!hasConnection) {
     connectionBadge.classList.add('disconnected')
@@ -469,6 +480,12 @@ async function updateBMWStatus() {
 }
 
 function controlBMW(command, button) {
+  const disabled = localStorage.getItem('disableBMW') === 'true'
+
+  if (disabled) {
+    return
+  }
+
   const testMode = localStorage.getItem('testMode') === 'true'
 
   if (testMode) {
@@ -514,6 +531,23 @@ function controlBMW(command, button) {
 
 // Mitsubishi Outlander control functions
 async function updateMitsubishiStatus() {
+  // Check if Mitsubishi is disabled
+  const disabled = localStorage.getItem('disableMitsubishi') === 'true'
+
+  const connectionBadge = document.getElementById('mitsubishiConnection')
+  const statusInfo = document.getElementById('mitsubishiStatusInfo')
+  const connectionText = connectionBadge.querySelector('.connection-text')
+  const infoPanel = document.getElementById('mitsubishiPanel')
+
+  if (disabled) {
+    connectionBadge.classList.add('disconnected')
+    connectionBadge.classList.remove('error')
+    connectionText.textContent = 'Disabled'
+    statusInfo.style.display = 'none'
+    infoPanel.classList.add('offline')
+    return
+  }
+
   const testMode = localStorage.getItem('testMode') === 'true'
 
   let batteryLevel, range, isCharging, hasConnection
@@ -556,12 +590,6 @@ async function updateMitsubishiStatus() {
       hasConnection = false
     }
   }
-
-  // Update connection status
-  const connectionBadge = document.getElementById('mitsubishiConnection')
-  const statusInfo = document.getElementById('mitsubishiStatusInfo')
-  const connectionText = connectionBadge.querySelector('.connection-text')
-  const infoPanel = document.getElementById('mitsubishiPanel')
 
   if (!hasConnection) {
     connectionBadge.classList.add('disconnected')
@@ -608,6 +636,12 @@ async function updateMitsubishiStatus() {
 }
 
 function controlOutlander(command, button) {
+  const disabled = localStorage.getItem('disableMitsubishi') === 'true'
+
+  if (disabled) {
+    return
+  }
+
   const testMode = localStorage.getItem('testMode') === 'true'
 
   if (testMode) {
