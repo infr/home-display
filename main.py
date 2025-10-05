@@ -180,12 +180,12 @@ def update_app():
         subprocess.run(["sudo", "systemctl", "restart", "uvicorn.service"], check=True)
         return {"status": "ok"}
     except subprocess.CalledProcessError as e:
-        error_msg = f"Command failed: {' '.join(e.cmd)}\nExit code: {e.returncode}\nStderr: {e.stderr}\nStdout: {e.stdout}"
-        print(error_msg)
+        error_msg = e.stderr if e.stderr else str(e)
+        print(f"Update failed: {error_msg}")
         raise HTTPException(status_code=500, detail={"status": "failed", "error": error_msg})
     except Exception as e:
-        error_msg = f"Unexpected error: {str(e)}"
-        print(error_msg)
+        error_msg = str(e)
+        print(f"Update failed: {error_msg}")
         raise HTTPException(status_code=500, detail={"status": "failed", "error": error_msg})
 
 @app.post("/api/kill-browser")

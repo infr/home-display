@@ -118,7 +118,7 @@ async function killBrowser() {
 
       if (!response.ok) {
         const text = await response.text()
-        addDebugLog(`POST /api/kill-browser: ERROR - ${text.substring(0, 100)}`)
+        addDebugLog(`POST /api/kill-browser: ERROR - ${text}`)
         return
       }
 
@@ -137,7 +137,7 @@ async function updateApp() {
 
       if (!response.ok) {
         const text = await response.text()
-        addDebugLog(`POST /api/update: ERROR - ${text.substring(0, 100)}`)
+        addDebugLog(`POST /api/update: ERROR - ${text}`)
         return
       }
 
@@ -187,7 +187,7 @@ async function rebootSystem() {
 
       if (!response.ok) {
         const text = await response.text()
-        addDebugLog(`POST /api/reboot: ERROR - ${text.substring(0, 100)}`)
+        addDebugLog(`POST /api/reboot: ERROR - ${text}`)
         return
       }
 
