@@ -102,9 +102,9 @@ async function killBrowser() {
     try {
       const response = await fetch('/api/kill-browser', { method: 'POST' })
       const data = await response.json()
-      addDebugLog(`Kill browser: ${data.status}`)
+      addDebugLog(`POST /api/kill-browser: ${response.status}`)
     } catch (e) {
-      addDebugLog(`Kill browser: ERROR - ${e.message}`)
+      addDebugLog(`POST /api/kill-browser: ERROR - ${e.message}`)
     }
   }
 }
@@ -114,10 +114,10 @@ async function updateApp() {
     try {
       const response = await fetch('/api/redeploy', { method: 'POST' })
       const data = await response.json()
-      addDebugLog(`Update: ${data.status}`)
+      addDebugLog(`POST /api/redeploy: ${response.status}`)
       setTimeout(() => location.reload(), 2000)
     } catch (e) {
-      addDebugLog(`Update: ERROR - ${e.message}`)
+      addDebugLog(`POST /api/redeploy: ERROR - ${e.message}`)
     }
   }
 }
@@ -127,9 +127,9 @@ async function rebootSystem() {
     try {
       const response = await fetch('/api/reboot', { method: 'POST' })
       const data = await response.json()
-      addDebugLog(`Reboot: ${data.status}`)
+      addDebugLog(`POST /api/reboot: ${response.status}`)
     } catch (e) {
-      addDebugLog(`Reboot: ERROR - ${e.message}`)
+      addDebugLog(`POST /api/reboot: ERROR - ${e.message}`)
     }
   }
 }
