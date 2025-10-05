@@ -158,11 +158,8 @@ def reboot_system():
 @app.post("/api/update")
 def update_app():
     try:
-        subprocess.run(["git", "-C", "/home/pi/home-display", "pull", "--rebase"])
-        os.execv(sys.executable, [
-            sys.executable, "-m", "uvicorn", "main:app",
-            "--host", "127.0.0.1", "--port", "8990"
-        ])
+        subprocess.run(["sudo", "git", "-C", "/home/pi/home-display", "pull", "--rebase"], check=True)
+        subprocess.run(["sudo", "systemctl", "restart", "uvicorn.service"], check=True)
         return {"status": "ok"}
     except Exception as e:
         raise HTTPException(status_code=500, detail={"status": "failed", "error": str(e)})
@@ -177,7 +174,8 @@ def kill_browser():
         subprocess.run(["pkill", "-KILL", "chromium"])
         return {"status": "ok"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail={"status": "failed", "error": str(e)})
+        # Don't raise exception if pkill fails (process might not exist)
+        return {"status": "ok"}
 
 # Mount static files after API routes
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
