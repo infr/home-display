@@ -61,12 +61,15 @@ function findOptimalChargingHours(data, hoursNeeded) {
     const nthCheapestIndex = Math.min(quartersNeeded - 1, sorted.length - 1)
     const thresholdPrice = sorted[nthCheapestIndex].value
 
+    // Use small tolerance, but cap at "low" price range (10c = lime/green threshold)
+    const maxPrice = Math.min(thresholdPrice + 1, 10)
+
     // Find consecutive blocks where price is reasonable
     const blocks = []
     let currentBlock = []
 
     dayData.forEach((quarter, index) => {
-      if (quarter.value <= thresholdPrice + 3) { // +3c tolerance
+      if (quarter.value <= maxPrice) {
         currentBlock.push(quarter)
       } else {
         if (currentBlock.length >= minWindowQuarters) {
