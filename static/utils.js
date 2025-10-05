@@ -34,7 +34,6 @@ async function fetchWeather() {
 
     if (testMode) {
       // Generate random test data
-      addDebugLog(`GET /weather: TEST MODE`)
       weatherCodes = Array.from({ length: 7 }, () => [0, 1, 2, 3, 45, 61, 71, 95][Math.floor(Math.random() * 8)])
       tempsMax = Array.from({ length: 7 }, () => Math.floor(Math.random() * 50) - 20) // -20°C to 30°C
       tempsMin = tempsMax.map(max => max - Math.floor(Math.random() * 10) - 5) // 5-15°C lower than max
