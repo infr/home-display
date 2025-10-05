@@ -131,6 +131,7 @@ html {
 
 .control-button.spin {
   animation: spin 1s linear infinite;
+  background: transparent;
 }
 
 @keyframes fadeToDefault {
