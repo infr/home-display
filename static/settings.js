@@ -114,8 +114,15 @@ async function killBrowser() {
   if (confirm('Kill browser process?')) {
     try {
       const response = await fetch('/api/kill-browser', { method: 'POST' })
-      const data = await response.json()
       addDebugLog(`POST /api/kill-browser: ${response.status}`)
+
+      if (!response.ok) {
+        const text = await response.text()
+        addDebugLog(`POST /api/kill-browser: ERROR - ${text.substring(0, 100)}`)
+        return
+      }
+
+      await response.json()
     } catch (e) {
       addDebugLog(`POST /api/kill-browser: ERROR - ${e.message}`)
     }
@@ -126,8 +133,15 @@ async function updateApp() {
   if (confirm('Update application? This will pull latest changes and restart.')) {
     try {
       const response = await fetch('/api/update', { method: 'POST' })
-      const data = await response.json()
       addDebugLog(`POST /api/update: ${response.status}`)
+
+      if (!response.ok) {
+        const text = await response.text()
+        addDebugLog(`POST /api/update: ERROR - ${text.substring(0, 100)}`)
+        return
+      }
+
+      const data = await response.json()
       setTimeout(() => location.reload(), 2000)
     } catch (e) {
       addDebugLog(`POST /api/update: ERROR - ${e.message}`)
@@ -139,8 +153,15 @@ async function rebootSystem() {
   if (confirm('Reboot system? This will restart the entire system.')) {
     try {
       const response = await fetch('/api/reboot', { method: 'POST' })
-      const data = await response.json()
       addDebugLog(`POST /api/reboot: ${response.status}`)
+
+      if (!response.ok) {
+        const text = await response.text()
+        addDebugLog(`POST /api/reboot: ERROR - ${text.substring(0, 100)}`)
+        return
+      }
+
+      await response.json()
     } catch (e) {
       addDebugLog(`POST /api/reboot: ERROR - ${e.message}`)
     }
