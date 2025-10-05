@@ -152,6 +152,10 @@ def mitsubishi_acmode(mode: str, minutes: int):
     result = execute_mitsubishi_command(["phevctl", "acmode", mode, str(minutes)])
     return result
 
+@app.get("/api/healthcheck")
+def healthcheck():
+    return {"status": "ok"}
+
 @app.post("/api/reboot")
 def reboot_system():
     try:

@@ -141,8 +141,38 @@ async function updateApp() {
         return
       }
 
-      const data = await response.json()
-      setTimeout(() => location.reload(), 2000)
+      await response.json()
+      addDebugLog('Waiting for service to restart...')
+
+      // Poll healthcheck every 5 seconds, reload when service is back up
+      const startTime = Date.now()
+      const maxWait = 120000 // 2 minutes max
+
+      const checkHealth = async () => {
+        try {
+          const healthResponse = await fetch('/api/healthcheck')
+          if (healthResponse.ok) {
+            addDebugLog('Service is back up, reloading...')
+            setTimeout(() => location.reload(true), 1000)
+            return
+          }
+        } catch (e) {
+          // Service still down, expected
+        }
+
+        // Check if we've exceeded max wait time
+        if (Date.now() - startTime > maxWait) {
+          addDebugLog('Update timeout - reloading anyway')
+          location.reload(true)
+          return
+        }
+
+        // Try again in 5 seconds
+        setTimeout(checkHealth, 5000)
+      }
+
+      // Start polling after 10 seconds (give service time to restart)
+      setTimeout(checkHealth, 10000)
     } catch (e) {
       addDebugLog(`POST /api/update: ERROR - ${e.message}`)
     }
