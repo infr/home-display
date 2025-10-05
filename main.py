@@ -174,8 +174,7 @@ def kill_browser():
         subprocess.run(["pkill", "-KILL", "chromium"])
         return {"status": "ok"}
     except Exception as e:
-        # Don't raise exception if pkill fails (process might not exist)
-        return {"status": "ok"}
+        raise HTTPException(status_code=500, detail={"status": "failed", "error": str(e)})
 
 # Mount static files after API routes
 app.mount("/", StaticFiles(directory="static", html=True), name="static")

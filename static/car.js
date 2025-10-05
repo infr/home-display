@@ -78,12 +78,10 @@ function driveToChart(element) {
 
   const canvas = document.getElementById('electricityChart')
   if (!canvas || typeof priceData === 'undefined' || !priceData.length) {
-    console.log('[Car Animation] No canvas or price data, doing simple drive animation')
     drive(element)
     return
   }
 
-  console.log('[Car Animation] Starting chart animation with', priceData.length, 'price points')
   isAnimatingChart = true
 
   // Reset flags for new animation
@@ -332,7 +330,6 @@ function driveToChart(element) {
     if (progress < 1) {
       requestAnimationFrame(animate)
     } else {
-      console.log('[Car Animation] Animation complete')
       element.style.transform = ''
       isAnimatingChart = false
       window._loggedOnChart = false
