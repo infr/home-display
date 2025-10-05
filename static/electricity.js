@@ -25,7 +25,7 @@ const ELECTRICITY_CONFIG = {
   testMode: false,
   chargingHours: 6, // Default hours needed per day (BMW 330e/Outlander PHEV Schuko charging)
   veryLowPriceThreshold: 2, // c/kWh - if all prices under this, show all as optimal
-  priceWindowMargin: 4 // c/kWh - show hours within this margin of Nth cheapest hour (wider guideline)
+  priceWindowMargin: 2 // c/kWh - show hours within this margin of Nth cheapest hour
 }
 
 let electricityChart = null
