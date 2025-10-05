@@ -27,19 +27,40 @@ const WEATHER_LONGITUDE = 24.7976
 const WEATHER_TIMEZONE = 'Europe/Helsinki'
 
 async function fetchWeather() {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${WEATHER_LATITUDE}&longitude=${WEATHER_LONGITUDE}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=${encodeURIComponent(
-    WEATHER_TIMEZONE
-  )}&current_weather=true`
+  const testMode = localStorage.getItem('testMode') === 'true'
+
   try {
-    const response = await fetch(url)
-    const data = await response.json()
-    addDebugLog(`GET /weather: ${response.status}`)
-    if (!data.daily) return
-    const days = data.daily
-    const weatherCodes = days.weathercode
-    const tempsMax = days.temperature_2m_max
-    const tempsMin = days.temperature_2m_min
-    const dates = days.time
+    let weatherCodes, tempsMax, tempsMin, dates, currentTemp, currentWeatherCode
+
+    if (testMode) {
+      // Generate random test data
+      addDebugLog(`GET /weather: TEST MODE`)
+      weatherCodes = Array.from({ length: 7 }, () => [0, 1, 2, 3, 45, 61, 71, 95][Math.floor(Math.random() * 8)])
+      tempsMax = Array.from({ length: 7 }, () => Math.floor(Math.random() * 20) + 10) // 10-30°C
+      tempsMin = tempsMax.map(max => max - Math.floor(Math.random() * 10) - 5) // 5-15°C lower than max
+      dates = Array.from({ length: 7 }, (_, i) => {
+        const date = new Date()
+        date.setDate(date.getDate() + i)
+        return date.toISOString().split('T')[0]
+      })
+      currentTemp = Math.floor(Math.random() * 20) + 10 // 10-30°C
+      currentWeatherCode = weatherCodes[0]
+    } else {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${WEATHER_LATITUDE}&longitude=${WEATHER_LONGITUDE}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=${encodeURIComponent(
+        WEATHER_TIMEZONE
+      )}&current_weather=true`
+      const response = await fetch(url)
+      const data = await response.json()
+      addDebugLog(`GET /weather: ${response.status}`)
+      if (!data.daily) return
+      const days = data.daily
+      weatherCodes = days.weathercode
+      tempsMax = days.temperature_2m_max
+      tempsMin = days.temperature_2m_min
+      dates = days.time
+      currentTemp = data.current_weather?.temperature
+      currentWeatherCode = data.current_weather?.weathercode
+    }
 
     const icons = weatherCodes.map(code => weatherIcon(code))
     const dayNames = dates.map((d, i) =>
@@ -47,12 +68,12 @@ async function fetchWeather() {
     )
 
     let html = ''
-    if (data.current_weather && typeof data.current_weather.temperature === 'number') {
+    if (typeof currentTemp === 'number') {
       html += `<div class="weather-card">
         <div class="weather-day">Now</div>
-        <div class="weather-icon">${weatherIcon(data.current_weather.weathercode)}</div>
+        <div class="weather-icon">${weatherIcon(currentWeatherCode)}</div>
         <div class="weather-temps">
-          <span class="weather-high">${Math.round(data.current_weather.temperature)}°</span>
+          <span class="weather-high">${Math.round(currentTemp)}°</span>
         </div>
       </div>`
     }

@@ -274,6 +274,11 @@ function toggleTestMode() {
   if (typeof updateMitsubishiStatus === 'function') {
     updateMitsubishiStatus()
   }
+
+  // Update weather with test data
+  if (typeof fetchWeather === 'function') {
+    fetchWeather()
+  }
 }
 
 function toggleDisableBMW() {
