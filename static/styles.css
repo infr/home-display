@@ -76,6 +76,7 @@ html {
   cursor: pointer;
   position: relative;
   z-index: 10;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .controls {
@@ -102,6 +103,7 @@ html {
   border-radius: 6px;
   min-width: 44px;
   min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .control-button:hover {
@@ -219,6 +221,7 @@ html {
   display: flex;
   align-items: center;
   justify-content: center;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .modal {
