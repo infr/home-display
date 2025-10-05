@@ -153,7 +153,7 @@ async function updateApp() {
           const healthResponse = await fetch('/api/healthcheck')
           if (healthResponse.ok) {
             addDebugLog('Service is back up, reloading...')
-            setTimeout(() => location.reload(true), 1000)
+            setTimeout(() => window.location.href = window.location.href.split('?')[0] + '?v=' + Date.now(), 1000)
             return
           }
         } catch (e) {
@@ -163,7 +163,7 @@ async function updateApp() {
         // Check if we've exceeded max wait time
         if (Date.now() - startTime > maxWait) {
           addDebugLog('Update timeout - reloading anyway')
-          location.reload(true)
+          window.location.href = window.location.href.split('?')[0] + '?v=' + Date.now()
           return
         }
 

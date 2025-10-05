@@ -156,7 +156,7 @@
             <div class="setting-item">
               <div id="output" class="log-output"></div>
               <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-top: 4px;">
-                <button onclick="location.reload(true)" class="action-button">Refresh</button>
+                <button onclick="window.location.href = window.location.href.split('?')[0] + '?v=' + Date.now()" class="action-button">Refresh</button>
                 <button onclick="clearDebugLogs()" class="action-button">Clear Log</button>
                 <button onclick="killBrowser()" class="action-button">Kill Browser</button>
                 <button onclick="updateApp()" class="action-button">Update</button>
