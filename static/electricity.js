@@ -193,12 +193,12 @@ function renderElectricityChart() {
     return
   }
 
-  // Get data for the next 24 hours from now
+  // Show all available data from now onwards
   const now = new Date()
   let dataToShow = priceData.filter(price => {
     const priceDate = new Date(price.date)
-    return priceDate >= now && priceDate < new Date(now.getTime() + ELECTRICITY_CONFIG.hoursToShow * 60 * 60 * 1000)
-  }).slice(0, 96) // Max 96 quarters (24 hours)
+    return priceDate >= now
+  })
 
   if (dataToShow.length === 0) return
 
