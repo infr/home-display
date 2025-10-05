@@ -25,7 +25,7 @@ const ELECTRICITY_CONFIG = {
   testMode: false,
   chargingHours: 6, // Default hours needed per day (BMW 330e/Outlander PHEV Schuko charging)
   veryLowPriceThreshold: 2, // c/kWh - if all prices under this, show all as optimal
-  priceWindowMargin: 2 // c/kWh - show hours within this margin of Nth cheapest hour
+  minWindowHours: 2 // Minimum consecutive hours for a charging window
 }
 
 let electricityChart = null
@@ -37,6 +37,7 @@ function findOptimalChargingHours(data, hoursNeeded) {
   if (!data || data.length === 0) return []
 
   const quartersNeeded = hoursNeeded * 4 // 15-minute intervals
+  const minWindowQuarters = ELECTRICITY_CONFIG.minWindowHours * 4
   const optimalIndices = []
 
   // Group data by day
@@ -51,25 +52,40 @@ function findOptimalChargingHours(data, hoursNeeded) {
     dayGroups[dayKey].push({ ...price, originalIndex: index })
   })
 
-  // For each day, find cheapest N hours (not necessarily consecutive)
+  // For each day, find consecutive blocks of cheap hours
   Object.values(dayGroups).forEach(dayData => {
     if (dayData.length === 0) return
 
-    // Sort by price to find cheapest quarters
+    // Sort by price to find threshold
     const sorted = [...dayData].sort((a, b) => a.value - b.value)
-
-    // Find the Nth cheapest hour's price (or last if fewer hours available)
     const nthCheapestIndex = Math.min(quartersNeeded - 1, sorted.length - 1)
     const thresholdPrice = sorted[nthCheapestIndex].value
 
-    // Include all hours within the price window (threshold + margin)
-    const maxPrice = thresholdPrice + ELECTRICITY_CONFIG.priceWindowMargin
+    // Find consecutive blocks where price is reasonable
+    const blocks = []
+    let currentBlock = []
 
-    const optimalHours = sorted.filter(p => p.value <= maxPrice)
+    dayData.forEach((quarter, index) => {
+      if (quarter.value <= thresholdPrice + 3) { // +3c tolerance
+        currentBlock.push(quarter)
+      } else {
+        if (currentBlock.length >= minWindowQuarters) {
+          blocks.push([...currentBlock])
+        }
+        currentBlock = []
+      }
+    })
 
-    // Add their original indices
-    optimalHours.forEach(quarter => {
-      optimalIndices.push(quarter.originalIndex)
+    // Don't forget the last block
+    if (currentBlock.length >= minWindowQuarters) {
+      blocks.push(currentBlock)
+    }
+
+    // Add all blocks to optimal indices
+    blocks.forEach(block => {
+      block.forEach(quarter => {
+        optimalIndices.push(quarter.originalIndex)
+      })
     })
   })
 
