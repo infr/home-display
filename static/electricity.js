@@ -36,8 +36,7 @@ let optimalChargingIndices = []
 function findOptimalChargingHours(data, hoursNeeded) {
   if (!data || data.length === 0) return []
 
-  const quartersNeeded = hoursNeeded * 4 // 15-minute intervals
-  const minWindowQuarters = ELECTRICITY_CONFIG.minWindowHours * 4
+  const windowQuarters = ELECTRICITY_CONFIG.minWindowHours * 4 // 2 hours = 8 quarters
   const optimalIndices = []
 
   // Group data by day
@@ -52,46 +51,34 @@ function findOptimalChargingHours(data, hoursNeeded) {
     dayGroups[dayKey].push({ ...price, originalIndex: index })
   })
 
-  // For each day, find consecutive blocks of cheap hours
+  // For each day, use sliding window approach
   Object.values(dayGroups).forEach(dayData => {
-    if (dayData.length === 0) return
+    if (dayData.length < windowQuarters) return
 
-    // Sort by price to find threshold
-    const sorted = [...dayData].sort((a, b) => a.value - b.value)
-
-    // Calculate average of cheapest N hours (more robust than using single Nth value)
-    const cheapestN = sorted.slice(0, Math.min(quartersNeeded, sorted.length))
-    const avgPrice = cheapestN.reduce((sum, p) => sum + p.value, 0) / cheapestN.length
-
-    // Use small tolerance, but cap at "low" price range (10c = lime/green threshold)
-    const maxPrice = Math.min(avgPrice + 1, 10)
-
-    // Find consecutive blocks where price is reasonable
-    const blocks = []
-    let currentBlock = []
-
-    dayData.forEach((quarter, index) => {
-      if (quarter.value <= maxPrice) {
-        currentBlock.push(quarter)
-      } else {
-        if (currentBlock.length >= minWindowQuarters) {
-          blocks.push([...currentBlock])
-        }
-        currentBlock = []
-      }
-    })
-
-    // Don't forget the last block
-    if (currentBlock.length >= minWindowQuarters) {
-      blocks.push(currentBlock)
+    // Calculate average for each 2-hour window starting position
+    const windows = []
+    for (let i = 0; i <= dayData.length - windowQuarters; i++) {
+      const windowSlice = dayData.slice(i, i + windowQuarters)
+      const avg = windowSlice.reduce((sum, p) => sum + p.value, 0) / windowSlice.length
+      windows.push({ startIndex: i, avg: avg, slice: windowSlice })
     }
 
-    // Add all blocks to optimal indices
-    blocks.forEach(block => {
-      block.forEach(quarter => {
-        optimalIndices.push(quarter.originalIndex)
+    // Sort windows by average price
+    windows.sort((a, b) => a.avg - b.avg)
+
+    // Take bottom 25% of windows
+    const bottom25Count = Math.max(1, Math.ceil(windows.length * 0.25))
+    const bestWindows = windows.slice(0, bottom25Count)
+
+    // Mark all quarters in these windows as optimal
+    const markedIndices = new Set()
+    bestWindows.forEach(window => {
+      window.slice.forEach(quarter => {
+        markedIndices.add(quarter.originalIndex)
       })
     })
+
+    markedIndices.forEach(idx => optimalIndices.push(idx))
   })
 
   return optimalIndices
