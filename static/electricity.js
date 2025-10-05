@@ -73,12 +73,24 @@ function findOptimalChargingHours(data, hoursNeeded) {
     // Calculate threshold: max average of bottom 25% windows
     const threshold = Math.max(...bestWindows.map(w => w.avg))
 
-    // Mark any individual quarter below threshold (not just quarters in windows)
-    dayData.forEach(quarter => {
-      if (quarter.value <= threshold + 1) { // +1c tolerance for individual quarters
-        optimalIndices.push(quarter.originalIndex)
+    // Find consecutive blocks below threshold, keep only if >= 2h
+    let currentBlock = []
+    dayData.forEach((quarter, index) => {
+      if (quarter.value <= threshold + 1) { // +1c tolerance
+        currentBlock.push(quarter)
+      } else {
+        // End of block - check if it's long enough
+        if (currentBlock.length >= windowQuarters) {
+          currentBlock.forEach(q => optimalIndices.push(q.originalIndex))
+        }
+        currentBlock = []
       }
     })
+
+    // Don't forget last block
+    if (currentBlock.length >= windowQuarters) {
+      currentBlock.forEach(q => optimalIndices.push(q.originalIndex))
+    }
   })
 
   return optimalIndices
