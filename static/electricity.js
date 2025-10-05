@@ -50,27 +50,20 @@ function findOptimalChargingHours(data, hoursNeeded) {
     dayGroups[dayKey].push({ ...price, originalIndex: index })
   })
 
-  // For each day, find cheapest consecutive hours
+  // For each day, find cheapest N hours (not necessarily consecutive)
   Object.values(dayGroups).forEach(dayData => {
-    if (dayData.length < quartersNeeded) return
+    if (dayData.length === 0) return
 
-    let minSum = Infinity
-    let minStartIndex = 0
+    // Sort by price to find cheapest quarters
+    const sorted = [...dayData].sort((a, b) => a.value - b.value)
 
-    // Calculate sum for each possible consecutive window
-    for (let i = 0; i <= dayData.length - quartersNeeded; i++) {
-      const sum = dayData.slice(i, i + quartersNeeded).reduce((acc, p) => acc + p.value, 0)
+    // Take the cheapest N quarters
+    const cheapestQuarters = sorted.slice(0, Math.min(quartersNeeded, dayData.length))
 
-      if (sum < minSum) {
-        minSum = sum
-        minStartIndex = i
-      }
-    }
-
-    // Add optimal indices for this day
-    for (let i = minStartIndex; i < minStartIndex + quartersNeeded && i < dayData.length; i++) {
-      optimalIndices.push(dayData[i].originalIndex)
-    }
+    // Add their original indices
+    cheapestQuarters.forEach(quarter => {
+      optimalIndices.push(quarter.originalIndex)
+    })
   })
 
   return optimalIndices
