@@ -25,7 +25,7 @@ const ELECTRICITY_CONFIG = {
   testMode: false,
   chargingHours: 6, // Default hours needed per day (BMW 330e/Outlander PHEV Schuko charging)
   veryLowPriceThreshold: 2, // c/kWh - if all prices under this, show all as optimal
-  maxChargingPrice: 10 // c/kWh - don't highlight hours above this price
+  priceWindowMargin: 2 // c/kWh - show hours within this margin of Nth cheapest hour
 }
 
 let electricityChart = null
@@ -55,17 +55,20 @@ function findOptimalChargingHours(data, hoursNeeded) {
   Object.values(dayGroups).forEach(dayData => {
     if (dayData.length === 0) return
 
-    // Filter to only include hours below max price threshold
-    const affordableHours = dayData.filter(p => p.value <= ELECTRICITY_CONFIG.maxChargingPrice)
-
     // Sort by price to find cheapest quarters
-    const sorted = [...affordableHours].sort((a, b) => a.value - b.value)
+    const sorted = [...dayData].sort((a, b) => a.value - b.value)
 
-    // Take the cheapest N quarters (or all if fewer than needed)
-    const cheapestQuarters = sorted.slice(0, Math.min(quartersNeeded, sorted.length))
+    // Find the Nth cheapest hour's price (or last if fewer hours available)
+    const nthCheapestIndex = Math.min(quartersNeeded - 1, sorted.length - 1)
+    const thresholdPrice = sorted[nthCheapestIndex].value
+
+    // Include all hours within the price window (threshold + margin)
+    const maxPrice = thresholdPrice + ELECTRICITY_CONFIG.priceWindowMargin
+
+    const optimalHours = sorted.filter(p => p.value <= maxPrice)
 
     // Add their original indices
-    cheapestQuarters.forEach(quarter => {
+    optimalHours.forEach(quarter => {
       optimalIndices.push(quarter.originalIndex)
     })
   })
