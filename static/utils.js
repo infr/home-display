@@ -36,14 +36,14 @@ async function fetchWeather() {
       // Generate random test data
       addDebugLog(`GET /weather: TEST MODE`)
       weatherCodes = Array.from({ length: 7 }, () => [0, 1, 2, 3, 45, 61, 71, 95][Math.floor(Math.random() * 8)])
-      tempsMax = Array.from({ length: 7 }, () => Math.floor(Math.random() * 20) + 10) // 10-30°C
+      tempsMax = Array.from({ length: 7 }, () => Math.floor(Math.random() * 50) - 20) // -20°C to 30°C
       tempsMin = tempsMax.map(max => max - Math.floor(Math.random() * 10) - 5) // 5-15°C lower than max
       dates = Array.from({ length: 7 }, (_, i) => {
         const date = new Date()
         date.setDate(date.getDate() + i)
         return date.toISOString().split('T')[0]
       })
-      currentTemp = Math.floor(Math.random() * 20) + 10 // 10-30°C
+      currentTemp = Math.floor(Math.random() * 50) - 20 // -20°C to 30°C
       currentWeatherCode = weatherCodes[0]
     } else {
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${WEATHER_LATITUDE}&longitude=${WEATHER_LONGITUDE}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=${encodeURIComponent(
