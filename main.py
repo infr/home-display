@@ -44,6 +44,11 @@ def execute_command(command_list, check_output=True):
         output = result.decode()
         print(f"Command output: {output}")
 
+        # Check for BMW API blocking (489 status)
+        if "Blocked" in output or "489" in output:
+            print(f"BMW API blocked the request")
+            return {"status": "failed", "output": output, "error": "BMW API blocked (rate limited or region restricted)"}
+
         # For commands that modify state, check for success indicators
         # For read-only commands (list, status, info), successful execution means success
         if check_output:
