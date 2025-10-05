@@ -96,12 +96,12 @@ html {
   justify-content: center;
   transition: transform 0.1s, opacity 0.2s;
   margin: 0;
-  padding: 4px;
+  padding: 12px;
   box-shadow: none;
   border: none;
   border-radius: 6px;
-  min-width: 32px;
-  min-height: 32px;
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .control-button:hover {
@@ -208,12 +208,17 @@ html {
   position: fixed;
   top: 10px;
   right: 10px;
-  font-size: 24px;
+  font-size: 32px;
   cursor: pointer;
   z-index: 1000;
   background: transparent;
   border: none;
-  padding: 5px;
+  padding: 12px;
+  min-width: 56px;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modal {
@@ -399,7 +404,7 @@ html {
 .car-info-panel {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0;
   background: var(--input-bg);
   border-radius: 8px;
   padding: 8px;
@@ -422,10 +427,6 @@ html {
   gap: 6px;
   flex: 0 0 auto;
   width: fit-content;
-}
-
-.car-info-panel.offline {
-  opacity: 0.6;
 }
 
 .car-info-panel.offline .controls {

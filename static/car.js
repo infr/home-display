@@ -99,7 +99,7 @@ function driveToChart(element) {
     firstBarTopCanvas = paddingTop + chartHeightPx * (1 - normalizedHeight)
   }
 
-  const firstBarScreenY = chartRect.top + (firstBarTopCanvas / canvas.height) * chartRect.height - element.offsetHeight
+  const firstBarScreenY = chartRect.top + (firstBarTopCanvas / canvas.height) * chartRect.height - element.offsetHeight + 8
 
   // Track last position when leaving chart
   let lastChartX = 0
@@ -201,7 +201,7 @@ function driveToChart(element) {
 
       // Smooth the Y position with moderate window
       yHistory.push(barTopCanvas)
-      if (yHistory.length > 20) yHistory.shift()
+      if (yHistory.length > 30) yHistory.shift()
 
       // Simple average using stored sum for performance
       let ySum = 0
@@ -224,13 +224,13 @@ function driveToChart(element) {
       if (yHistory.length >= 5) {
         const lookback = Math.min(5, yHistory.length - 1)
         const yChange = yHistory[yHistory.length - 1] - yHistory[yHistory.length - 1 - lookback]
-        rotation = Math.atan2(yChange * direction, 30) * (180 / Math.PI)
-        rotation = Math.max(-80, Math.min(80, rotation))
+        rotation = Math.atan2(yChange * direction, 15) * (180 / Math.PI)
+        rotation = Math.max(-150, Math.min(150, rotation))
       }
 
       // Smooth rotation with moderate window
       rotationHistory.push(rotation)
-      if (rotationHistory.length > 15) rotationHistory.shift()
+      if (rotationHistory.length > 25) rotationHistory.shift()
       let rotSum = 0
       for (let i = 0; i < rotationHistory.length; i++) {
         rotSum += rotationHistory[i]
@@ -248,7 +248,8 @@ function driveToChart(element) {
       window._lastRotation = rotation
 
       // Convert canvas Y to screen Y
-      const targetScreenY = chartRect.top + (smoothY / canvas.height) * chartRect.height - element.offsetHeight
+      // Add small offset to compensate for car image positioning
+      const targetScreenY = chartRect.top + (smoothY / canvas.height) * chartRect.height - element.offsetHeight + 8
 
       translateX = currentX - carRect.left
       translateY = targetScreenY - carRect.top
@@ -367,7 +368,6 @@ async function updateBMWStatus() {
       isLocked = Math.random() > 0.5
       isCharging = batteryLevel < 80 && Math.random() > 0.6
     }
-    addDebugLog(`POST /bmw/status: TEST MODE`)
   } else {
     const vin = await initializeVIN()
     if (!vin) {
@@ -469,6 +469,15 @@ async function updateBMWStatus() {
 }
 
 function controlBMW(command, button) {
+  const testMode = localStorage.getItem('testMode') === 'true'
+
+  if (testMode) {
+    addDebugLog(`[BMW] ${command} - TEST MODE`)
+    button.classList.add('spin')
+    setTimeout(() => button.classList.remove('spin'), 1000)
+    return
+  }
+
   initializeVIN().then(vin => {
     if (!vin) {
       console.error('VIN is missing. Unable to proceed with command.')
@@ -516,7 +525,6 @@ async function updateMitsubishiStatus() {
       range = Math.floor(Math.random() * 50) + 10 // 10-60 km
       isCharging = batteryLevel < 80 && Math.random() > 0.6
     }
-    addDebugLog(`GET /mitsubishi/status: TEST MODE`)
   } else {
     try {
       const response = await fetch('/mitsubishi/status')
@@ -600,6 +608,15 @@ async function updateMitsubishiStatus() {
 }
 
 function controlOutlander(command, button) {
+  const testMode = localStorage.getItem('testMode') === 'true'
+
+  if (testMode) {
+    addDebugLog(`[Mitsubishi] ${command} - TEST MODE`)
+    button.classList.add('spin')
+    setTimeout(() => button.classList.remove('spin'), 1000)
+    return
+  }
+
   button.classList.add('spin')
 
   fetch(`/outlander/${command}`, { method: 'POST' })

@@ -91,38 +91,58 @@ async def list_vehicles():
 
     return result
     
+def execute_mitsubishi_command(command_list):
+    try:
+        print(f"Executing Mitsubishi command: {command_list}")
+        result = subprocess.check_output(command_list, stderr=subprocess.STDOUT, text=True)
+        print(f"Command output: {result}")
+        return {"status": "success", "output": result}
+    except subprocess.CalledProcessError as e:
+        print(f"Mitsubishi command failed with error: {e.output}")
+        raise HTTPException(status_code=500, detail={"status": "failed", "output": e.output, "error": str(e)})
+
 @app.get("/mitsubishi/status")
 def mitsubishi_status():
-    return {
-        "battery": subprocess.check_output(["phevctl", "battery"], text=True),
-        "chargestatus": subprocess.check_output(["phevctl", "chargestatus"], text=True),
-        "lockstatus": subprocess.check_output(["phevctl", "lockstatus"], text=True),
-        "hvac": subprocess.check_output(["phevctl", "hvac"], text=True),
-    }
+    try:
+        return {
+            "battery": subprocess.check_output(["phevctl", "battery"], stderr=subprocess.STDOUT, text=True),
+            "chargestatus": subprocess.check_output(["phevctl", "chargestatus"], stderr=subprocess.STDOUT, text=True),
+            "lockstatus": subprocess.check_output(["phevctl", "lockstatus"], stderr=subprocess.STDOUT, text=True),
+            "hvac": subprocess.check_output(["phevctl", "hvac"], stderr=subprocess.STDOUT, text=True),
+        }
+    except subprocess.CalledProcessError as e:
+        print(f"Mitsubishi status failed with error: {e.output}")
+        raise HTTPException(status_code=500, detail={"status": "failed", "output": e.output, "error": str(e)})
 
 @app.get("/mitsubishi/battery")
 def mitsubishi_battery():
-    return subprocess.check_output(["phevctl", "battery"], text=True)
+    result = execute_mitsubishi_command(["phevctl", "battery"])
+    return result["output"]
 
 @app.get("/mitsubishi/chargestatus")
 def mitsubishi_chargestatus():
-    return subprocess.check_output(["phevctl", "chargestatus"], text=True)
+    result = execute_mitsubishi_command(["phevctl", "chargestatus"])
+    return result["output"]
 
 @app.get("/mitsubishi/lockstatus")
 def mitsubishi_lockstatus():
-    return subprocess.check_output(["phevctl", "lockstatus"], text=True)
+    result = execute_mitsubishi_command(["phevctl", "lockstatus"])
+    return result["output"]
 
 @app.get("/mitsubishi/hvac")
 def mitsubishi_hvac():
-    return subprocess.check_output(["phevctl", "hvac"], text=True)
+    result = execute_mitsubishi_command(["phevctl", "hvac"])
+    return result["output"]
 
 @app.post("/mitsubishi/aircon/{state}")
 def mitsubishi_aircon(state: str):
-    return subprocess.check_output(["phevctl", "aircon", state], text=True)
+    result = execute_mitsubishi_command(["phevctl", "aircon", state])
+    return result
 
 @app.post("/mitsubishi/acmode/{mode}/{minutes}")
 def mitsubishi_acmode(mode: str, minutes: int):
-    return subprocess.check_output(["phevctl", "acmode", mode, str(minutes)], text=True)
+    result = execute_mitsubishi_command(["phevctl", "acmode", mode, str(minutes)])
+    return result
 
 # Mount static files after API routes
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
