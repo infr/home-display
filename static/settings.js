@@ -83,12 +83,24 @@ function updateWeatherInterval() {
   alert('Weather interval updated. Please reload the page for changes to take effect.')
 }
 
+function updateChargingHours() {
+  const hours = parseInt(document.getElementById('chargingHours').value)
+  localStorage.setItem('chargingHours', hours)
+  if (typeof ELECTRICITY_CONFIG !== 'undefined') {
+    ELECTRICITY_CONFIG.chargingHours = hours
+    if (typeof fetchElectricityPrices === 'function') {
+      fetchElectricityPrices()
+    }
+  }
+}
+
 function resetSettings() {
   if (confirm('Reset all settings to defaults?')) {
     localStorage.removeItem('themeMode')
     localStorage.removeItem('maxValue')
     localStorage.removeItem('carStatusInterval')
     localStorage.removeItem('weatherInterval')
+    localStorage.removeItem('chargingHours')
     localStorage.removeItem('testMode')
     localStorage.removeItem('disableBMW')
     localStorage.removeItem('disableMitsubishi')
@@ -165,6 +177,7 @@ function loadSettings() {
   const maxValue = parseInt(localStorage.getItem('maxValue')) || 30
   const carStatusInterval = parseInt(localStorage.getItem('carStatusInterval')) || 5
   const weatherInterval = parseInt(localStorage.getItem('weatherInterval')) || 15
+  const chargingHours = parseInt(localStorage.getItem('chargingHours')) || 3
   const testMode = localStorage.getItem('testMode') === 'true'
   const disableBMW = localStorage.getItem('disableBMW') === 'true'
   const disableMitsubishi = localStorage.getItem('disableMitsubishi') === 'true'
@@ -173,6 +186,7 @@ function loadSettings() {
   document.getElementById('maxValue').value = maxValue
   document.getElementById('carStatusInterval').value = carStatusInterval
   document.getElementById('weatherInterval').value = weatherInterval
+  document.getElementById('chargingHours').value = chargingHours
   document.getElementById('testModeToggle').checked = testMode
   document.getElementById('disableBMWToggle').checked = disableBMW
   document.getElementById('disableMitsubishiToggle').checked = disableMitsubishi
@@ -204,6 +218,7 @@ function loadSettings() {
   if (typeof ELECTRICITY_CONFIG !== 'undefined') {
     ELECTRICITY_CONFIG.priceScale.max = maxValue
     ELECTRICITY_CONFIG.testMode = testMode
+    ELECTRICITY_CONFIG.chargingHours = chargingHours
   }
 
   // Restore modal state

@@ -19,14 +19,61 @@ const ELECTRICITY_CONFIG = {
     current: '#3b82f6',
     background: '#f3f4f6',
     text: '#1f2937',
-    grid: '#d1d5db'
+    grid: '#d1d5db',
+    optimalCharging: 'rgba(147, 197, 253, 0.3)' // Light blue
   },
-  testMode: false
+  testMode: false,
+  chargingHours: 3 // Default hours needed per day
 }
 
 let electricityChart = null
 let priceData = []
 let currentPriceIndex = -1
+let optimalChargingIndices = []
+
+function findOptimalChargingHours(data, hoursNeeded) {
+  if (!data || data.length === 0) return []
+
+  const quartersNeeded = hoursNeeded * 4 // 15-minute intervals
+  const optimalIndices = []
+
+  // Group data by day
+  const dayGroups = {}
+  data.forEach((price, index) => {
+    const date = new Date(price.date)
+    const dayKey = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
+
+    if (!dayGroups[dayKey]) {
+      dayGroups[dayKey] = []
+    }
+    dayGroups[dayKey].push({ ...price, originalIndex: index })
+  })
+
+  // For each day, find cheapest consecutive hours
+  Object.values(dayGroups).forEach(dayData => {
+    if (dayData.length < quartersNeeded) return
+
+    let minSum = Infinity
+    let minStartIndex = 0
+
+    // Calculate sum for each possible consecutive window
+    for (let i = 0; i <= dayData.length - quartersNeeded; i++) {
+      const sum = dayData.slice(i, i + quartersNeeded).reduce((acc, p) => acc + p.value, 0)
+
+      if (sum < minSum) {
+        minSum = sum
+        minStartIndex = i
+      }
+    }
+
+    // Add optimal indices for this day
+    for (let i = minStartIndex; i < minStartIndex + quartersNeeded && i < dayData.length; i++) {
+      optimalIndices.push(dayData[i].originalIndex)
+    }
+  })
+
+  return optimalIndices
+}
 
 async function fetchElectricityPrices() {
   // Check if test mode is enabled
@@ -59,6 +106,7 @@ async function fetchElectricityPrices() {
 
     priceData = testData
     updateCurrentPriceIndex()
+    optimalChargingIndices = findOptimalChargingHours(priceData, ELECTRICITY_CONFIG.chargingHours)
     renderElectricityChart()
     return
   }
@@ -83,6 +131,7 @@ async function fetchElectricityPrices() {
     if (data && data.prices) {
       priceData = data.prices
       updateCurrentPriceIndex()
+      optimalChargingIndices = findOptimalChargingHours(priceData, ELECTRICITY_CONFIG.chargingHours)
       renderElectricityChart()
     }
   } catch (error) {
@@ -214,10 +263,19 @@ function renderElectricityChart() {
     ctx.fillText(`${price}`, padding.left - 10, y + 6)
   }
 
-
-  // Draw bars - simplified
+  // Draw optimal charging background highlights
   const barWidth = chartWidth / dataToShow.length
 
+  dataToShow.forEach((price, index) => {
+    const globalIndex = priceData.indexOf(price)
+    if (optimalChargingIndices.includes(globalIndex)) {
+      const x = padding.left + index * barWidth
+      ctx.fillStyle = ELECTRICITY_CONFIG.colors.optimalCharging
+      ctx.fillRect(x, padding.top, barWidth - 1, chartHeight)
+    }
+  })
+
+  // Draw bars
   dataToShow.forEach((price, index) => {
     const actualValue = price.value
     const x = padding.left + index * barWidth
