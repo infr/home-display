@@ -112,12 +112,12 @@ async function killBrowser() {
 async function updateApp() {
   if (confirm('Update application? This will pull latest changes and restart.')) {
     try {
-      const response = await fetch('/api/redeploy', { method: 'POST' })
+      const response = await fetch('/api/update', { method: 'POST' })
       const data = await response.json()
-      addDebugLog(`POST /api/redeploy: ${response.status}`)
+      addDebugLog(`POST /api/update: ${response.status}`)
       setTimeout(() => location.reload(), 2000)
     } catch (e) {
-      addDebugLog(`POST /api/redeploy: ERROR - ${e.message}`)
+      addDebugLog(`POST /api/update: ERROR - ${e.message}`)
     }
   }
 }

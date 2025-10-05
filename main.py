@@ -155,8 +155,8 @@ def reboot_system():
     except Exception as e:
         raise HTTPException(status_code=500, detail={"status": "failed", "error": str(e)})
 
-@app.post("/api/redeploy")
-def redeploy():
+@app.post("/api/update")
+def update_app():
     try:
         subprocess.run(["git", "-C", "/home/pi/home-display", "pull", "--rebase"])
         os.execv(sys.executable, [
