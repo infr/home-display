@@ -109,15 +109,15 @@ async function killBrowser() {
   }
 }
 
-async function redeploy() {
-  if (confirm('Redeploy application? This will restart the server.')) {
+async function updateApp() {
+  if (confirm('Update application? This will pull latest changes and restart.')) {
     try {
       const response = await fetch('/api/redeploy', { method: 'POST' })
       const data = await response.json()
-      addDebugLog(`Redeploy: ${data.status}`)
+      addDebugLog(`Update: ${data.status}`)
       setTimeout(() => location.reload(), 2000)
     } catch (e) {
-      addDebugLog(`Redeploy: ERROR - ${e.message}`)
+      addDebugLog(`Update: ERROR - ${e.message}`)
     }
   }
 }
