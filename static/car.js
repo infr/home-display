@@ -1,5 +1,64 @@
 // Car animations and controls
 
+// Helper functions for car status management
+function getCarElements(carId) {
+  return {
+    connectionBadge: document.getElementById(`${carId}Connection`),
+    statusInfo: document.getElementById(`${carId}StatusInfo`),
+    infoPanel: document.getElementById(`${carId}Panel`),
+    batteryLevel: document.getElementById(`${carId}BatteryLevel`),
+    batteryPercent: document.getElementById(`${carId}BatteryPercent`),
+    chargingStatus: document.getElementById(`${carId}ChargingStatus`),
+    range: document.getElementById(`${carId}Range`)
+  }
+}
+
+function setConnectionStatus(elements, status) {
+  const { connectionBadge, statusInfo, infoPanel } = elements
+  const connectionText = connectionBadge.querySelector('.connection-text')
+
+  connectionBadge.classList.remove('disconnected', 'error')
+
+  if (status === 'disabled') {
+    connectionBadge.classList.add('disconnected')
+    connectionText.textContent = 'Disabled'
+    statusInfo.style.display = 'none'
+    infoPanel.classList.add('offline')
+  } else if (status === 'offline') {
+    connectionBadge.classList.add('disconnected')
+    connectionText.textContent = 'Offline'
+    statusInfo.style.display = 'none'
+    infoPanel.classList.add('offline')
+  } else { // online
+    connectionText.textContent = 'Online'
+    statusInfo.style.display = 'block'
+    infoPanel.classList.remove('offline')
+  }
+}
+
+function updateBatteryDisplay(elements, batteryLevel) {
+  const { batteryLevel: batteryLevelElem, batteryPercent } = elements
+
+  batteryLevelElem.style.width = `${batteryLevel}%`
+  batteryLevelElem.classList.remove('low', 'medium', 'high')
+
+  if (batteryLevel <= 33) {
+    batteryLevelElem.classList.add('low')
+  } else if (batteryLevel <= 66) {
+    batteryLevelElem.classList.add('medium')
+  } else {
+    batteryLevelElem.classList.add('high')
+  }
+
+  batteryPercent.textContent = `${batteryLevel}%`
+}
+
+function updateChargingDisplay(elements, isCharging) {
+  const { chargingStatus } = elements
+  const chargingText = chargingStatus.querySelector('.status-text')
+  chargingText.textContent = isCharging ? 'Charging' : 'Not charging'
+}
+
 function spinit(element) {
   element.classList.remove('spin')
   void element.offsetWidth
@@ -336,20 +395,11 @@ async function initializeVIN() {
 }
 
 async function updateBMWStatus() {
+  const elements = getCarElements('bmw')
+
   // Check if BMW is disabled
-  const disabled = localStorage.getItem('disableBMW') === 'true'
-
-  const connectionBadge = document.getElementById('bmwConnection')
-  const statusInfo = document.getElementById('bmwStatusInfo')
-  const connectionText = connectionBadge.querySelector('.connection-text')
-  const infoPanel = document.getElementById('bmwPanel')
-
-  if (disabled) {
-    connectionBadge.classList.add('disconnected')
-    connectionBadge.classList.remove('error')
-    connectionText.textContent = 'Disabled'
-    statusInfo.style.display = 'none'
-    infoPanel.classList.add('offline')
+  if (localStorage.getItem('disableBMW') === 'true') {
+    setConnectionStatus(elements, 'disabled')
     return
   }
 
@@ -409,35 +459,14 @@ async function updateBMWStatus() {
   }
 
   if (!hasConnection) {
-    connectionBadge.classList.add('disconnected')
-    connectionBadge.classList.remove('error')
-    connectionText.textContent = 'Offline'
-    statusInfo.style.display = 'none'
-    infoPanel.classList.add('offline')
+    setConnectionStatus(elements, 'offline')
     return
   }
 
-  connectionBadge.classList.remove('disconnected', 'error')
-  connectionText.textContent = 'Online'
-  statusInfo.style.display = 'block'
-  infoPanel.classList.remove('offline')
+  setConnectionStatus(elements, 'online')
 
   // Update battery level
-  const batteryLevel_elem = document.getElementById('bmwBatteryLevel')
-  const batteryPercent = document.getElementById('bmwBatteryPercent')
-
-  batteryLevel_elem.style.width = `${batteryLevel}%`
-  batteryLevel_elem.classList.remove('low', 'medium', 'high')
-
-  if (batteryLevel <= 33) {
-    batteryLevel_elem.classList.add('low')
-  } else if (batteryLevel <= 66) {
-    batteryLevel_elem.classList.add('medium')
-  } else {
-    batteryLevel_elem.classList.add('high')
-  }
-
-  batteryPercent.textContent = `${batteryLevel}%`
+  updateBatteryDisplay(elements, batteryLevel)
 
   // Update charging status
   const chargingStatus = document.getElementById('bmwChargingStatus')
@@ -449,7 +478,7 @@ async function updateBMWStatus() {
   }
 
   // Update range
-  document.getElementById('bmwRange').textContent = `${range} km`
+  elements.range.textContent = `${range} km`
 
   // Update lock status icon
   const lockButton = document.getElementById('bmwLockStatus')
@@ -515,20 +544,11 @@ function controlBMW(command, button) {
 
 // Mitsubishi Outlander control functions
 async function updateMitsubishiStatus() {
+  const elements = getCarElements('mitsubishi')
+
   // Check if Mitsubishi is disabled
-  const disabled = localStorage.getItem('disableMitsubishi') === 'true'
-
-  const connectionBadge = document.getElementById('mitsubishiConnection')
-  const statusInfo = document.getElementById('mitsubishiStatusInfo')
-  const connectionText = connectionBadge.querySelector('.connection-text')
-  const infoPanel = document.getElementById('mitsubishiPanel')
-
-  if (disabled) {
-    connectionBadge.classList.add('disconnected')
-    connectionBadge.classList.remove('error')
-    connectionText.textContent = 'Disabled'
-    statusInfo.style.display = 'none'
-    infoPanel.classList.add('offline')
+  if (localStorage.getItem('disableMitsubishi') === 'true') {
+    setConnectionStatus(elements, 'disabled')
     return
   }
 
@@ -576,35 +596,14 @@ async function updateMitsubishiStatus() {
   }
 
   if (!hasConnection) {
-    connectionBadge.classList.add('disconnected')
-    connectionBadge.classList.remove('error')
-    connectionText.textContent = 'Offline'
-    statusInfo.style.display = 'none'
-    infoPanel.classList.add('offline')
+    setConnectionStatus(elements, 'offline')
     return
   }
 
-  connectionBadge.classList.remove('disconnected', 'error')
-  connectionText.textContent = 'Online'
-  statusInfo.style.display = 'block'
-  infoPanel.classList.remove('offline')
+  setConnectionStatus(elements, 'online')
 
   // Update battery level
-  const batteryLevel_elem = document.getElementById('mitsubishiBatteryLevel')
-  const batteryPercent = document.getElementById('mitsubishiBatteryPercent')
-
-  batteryLevel_elem.style.width = `${batteryLevel}%`
-  batteryLevel_elem.classList.remove('low', 'medium', 'high')
-
-  if (batteryLevel <= 33) {
-    batteryLevel_elem.classList.add('low')
-  } else if (batteryLevel <= 66) {
-    batteryLevel_elem.classList.add('medium')
-  } else {
-    batteryLevel_elem.classList.add('high')
-  }
-
-  batteryPercent.textContent = `${batteryLevel}%`
+  updateBatteryDisplay(elements, batteryLevel)
 
   // Update charging status
   const chargingStatus = document.getElementById('mitsubishiChargingStatus')
@@ -616,7 +615,7 @@ async function updateMitsubishiStatus() {
   }
 
   // Update range
-  document.getElementById('mitsubishiRange').textContent = `${range} km`
+  elements.range.textContent = `${range} km`
 }
 
 function controlOutlander(command, button) {
