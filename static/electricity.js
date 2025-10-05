@@ -39,59 +39,45 @@ function findOptimalChargingHours(data, hoursNeeded) {
   const windowQuarters = ELECTRICITY_CONFIG.minWindowHours * 4 // 2 hours = 8 quarters
   const optimalIndices = []
 
-  // Group data by day
-  const dayGroups = {}
-  data.forEach((price, index) => {
-    const date = new Date(price.date)
-    const dayKey = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
+  // Analyze ALL data together, not per day
+  if (data.length < windowQuarters) return []
 
-    if (!dayGroups[dayKey]) {
-      dayGroups[dayKey] = []
-    }
-    dayGroups[dayKey].push({ ...price, originalIndex: index })
-  })
+  // Calculate average for each 2-hour window starting position across ALL data
+  const windows = []
+  for (let i = 0; i <= data.length - windowQuarters; i++) {
+    const windowSlice = data.slice(i, i + windowQuarters)
+    const avg = windowSlice.reduce((sum, p) => sum + p.value, 0) / windowSlice.length
+    windows.push({ startIndex: i, avg: avg })
+  }
 
-  // For each day, use sliding window approach
-  Object.values(dayGroups).forEach(dayData => {
-    if (dayData.length < windowQuarters) return
+  // Sort windows by average price
+  windows.sort((a, b) => a.avg - b.avg)
 
-    // Calculate average for each 2-hour window starting position
-    const windows = []
-    for (let i = 0; i <= dayData.length - windowQuarters; i++) {
-      const windowSlice = dayData.slice(i, i + windowQuarters)
-      const avg = windowSlice.reduce((sum, p) => sum + p.value, 0) / windowSlice.length
-      windows.push({ startIndex: i, avg: avg, slice: windowSlice })
-    }
+  // Take bottom 25% of windows to find threshold
+  const bottom25Count = Math.max(1, Math.ceil(windows.length * 0.25))
+  const bestWindows = windows.slice(0, bottom25Count)
 
-    // Sort windows by average price
-    windows.sort((a, b) => a.avg - b.avg)
+  // Calculate threshold: max average of bottom 25% windows
+  const threshold = Math.max(...bestWindows.map(w => w.avg))
 
-    // Take bottom 25% of windows to find threshold
-    const bottom25Count = Math.max(1, Math.ceil(windows.length * 0.25))
-    const bestWindows = windows.slice(0, bottom25Count)
-
-    // Calculate threshold: max average of bottom 25% windows
-    const threshold = Math.max(...bestWindows.map(w => w.avg))
-
-    // Find consecutive blocks below threshold, keep only if >= 2h
-    let currentBlock = []
-    dayData.forEach((quarter, index) => {
-      if (quarter.value <= threshold + 1) { // +1c tolerance
-        currentBlock.push(quarter)
-      } else {
-        // End of block - check if it's long enough
-        if (currentBlock.length >= windowQuarters) {
-          currentBlock.forEach(q => optimalIndices.push(q.originalIndex))
-        }
-        currentBlock = []
+  // Find consecutive blocks below threshold, keep only if >= 2h
+  let currentBlock = []
+  data.forEach((quarter, index) => {
+    if (quarter.value <= threshold + 1) { // +1c tolerance
+      currentBlock.push(index)
+    } else {
+      // End of block - check if it's long enough
+      if (currentBlock.length >= windowQuarters) {
+        currentBlock.forEach(idx => optimalIndices.push(idx))
       }
-    })
-
-    // Don't forget last block
-    if (currentBlock.length >= windowQuarters) {
-      currentBlock.forEach(q => optimalIndices.push(q.originalIndex))
+      currentBlock = []
     }
   })
+
+  // Don't forget last block
+  if (currentBlock.length >= windowQuarters) {
+    currentBlock.forEach(idx => optimalIndices.push(idx))
+  }
 
   return optimalIndices
 }
