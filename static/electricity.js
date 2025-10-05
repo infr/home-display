@@ -23,7 +23,8 @@ const ELECTRICITY_CONFIG = {
     optimalCharging: 'rgba(147, 197, 253, 0.3)' // Light blue
   },
   testMode: false,
-  chargingHours: 3 // Default hours needed per day
+  chargingHours: 6, // Default hours needed per day (BMW 330e/Outlander PHEV Schuko charging)
+  veryLowPriceThreshold: 2 // c/kWh - if all prices under this, show all as optimal
 }
 
 let electricityChart = null
@@ -266,9 +267,13 @@ function renderElectricityChart() {
   // Draw optimal charging background highlights
   const barWidth = chartWidth / dataToShow.length
 
+  // Check if all visible prices are under threshold - if so, highlight everything
+  const allUnderThreshold = dataToShow.every(p => p.value < ELECTRICITY_CONFIG.veryLowPriceThreshold)
+
   dataToShow.forEach((price, index) => {
-    const globalIndex = priceData.indexOf(price)
-    if (optimalChargingIndices.includes(globalIndex)) {
+    const shouldHighlight = allUnderThreshold || optimalChargingIndices.includes(priceData.indexOf(price))
+
+    if (shouldHighlight) {
       const x = padding.left + index * barWidth
       ctx.fillStyle = ELECTRICITY_CONFIG.colors.optimalCharging
       ctx.fillRect(x, padding.top, barWidth - 1, chartHeight)

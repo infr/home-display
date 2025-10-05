@@ -177,7 +177,7 @@ function loadSettings() {
   const maxValue = parseInt(localStorage.getItem('maxValue')) || 30
   const carStatusInterval = parseInt(localStorage.getItem('carStatusInterval')) || 5
   const weatherInterval = parseInt(localStorage.getItem('weatherInterval')) || 15
-  const chargingHours = parseInt(localStorage.getItem('chargingHours')) || 3
+  const chargingHours = parseInt(localStorage.getItem('chargingHours')) || 6
   const testMode = localStorage.getItem('testMode') === 'true'
   const disableBMW = localStorage.getItem('disableBMW') === 'true'
   const disableMitsubishi = localStorage.getItem('disableMitsubishi') === 'true'
