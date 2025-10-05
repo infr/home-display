@@ -93,6 +93,7 @@ function resetSettings() {
     localStorage.removeItem('disableBMW')
     localStorage.removeItem('disableMitsubishi')
     localStorage.removeItem('bmw_vin')
+    localStorage.removeItem('settingsOpen')
     location.reload()
   }
 }
@@ -204,15 +205,23 @@ function loadSettings() {
     ELECTRICITY_CONFIG.priceScale.max = maxValue
     ELECTRICITY_CONFIG.testMode = testMode
   }
+
+  // Restore modal state
+  const settingsOpen = localStorage.getItem('settingsOpen') === 'true'
+  if (settingsOpen) {
+    openSettings()
+  }
 }
 
 function openSettings() {
   document.getElementById('settingsModal').style.display = 'block'
+  localStorage.setItem('settingsOpen', 'true')
   loadDebugLogs()
 }
 
 function closeSettings() {
   document.getElementById('settingsModal').style.display = 'none'
+  localStorage.setItem('settingsOpen', 'false')
 }
 
 function updateDarkMode() {
