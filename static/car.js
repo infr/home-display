@@ -109,8 +109,8 @@ function driveToChart(element) {
   const now = new Date()
   let dataToShow = priceData.filter(price => {
     const priceDate = new Date(price.date)
-    return priceDate >= now && priceDate < new Date(now.getTime() + 24 * 60 * 60 * 1000)
-  }).slice(0, 96)
+    return priceDate >= now
+  })
 
   const minPrice = 0
   const maxPrice = ELECTRICITY_CONFIG?.priceScale?.max || 30
