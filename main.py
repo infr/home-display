@@ -167,11 +167,26 @@ def reboot_system():
 @app.post("/api/update")
 def update_app():
     try:
-        subprocess.run(["sudo", "git", "-C", "/home/pi/home-display", "pull", "--rebase"], check=True)
+        # Git pull
+        result = subprocess.run(
+            ["sudo", "git", "-C", "/home/pi/home-display", "pull", "--rebase"],
+            check=True,
+            capture_output=True,
+            text=True
+        )
+        print(f"Git pull output: {result.stdout}")
+
+        # Restart service
         subprocess.run(["sudo", "systemctl", "restart", "uvicorn.service"], check=True)
         return {"status": "ok"}
+    except subprocess.CalledProcessError as e:
+        error_msg = f"Command failed: {' '.join(e.cmd)}\nExit code: {e.returncode}\nStderr: {e.stderr}\nStdout: {e.stdout}"
+        print(error_msg)
+        raise HTTPException(status_code=500, detail={"status": "failed", "error": error_msg})
     except Exception as e:
-        raise HTTPException(status_code=500, detail={"status": "failed", "error": str(e)})
+        error_msg = f"Unexpected error: {str(e)}"
+        print(error_msg)
+        raise HTTPException(status_code=500, detail={"status": "failed", "error": error_msg})
 
 @app.post("/api/kill-browser")
 def kill_browser():
