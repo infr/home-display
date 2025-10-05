@@ -132,7 +132,6 @@ function driveToChart(element) {
           yHistory.length = 0
           rotationHistory.length = 0
           window._clearedYHistoryOnReverse = true
-          console.log('[Car Animation] Direction reversed, cleared yHistory and rotationHistory to prevent jumps')
         }
       }
     } else {
@@ -176,9 +175,8 @@ function driveToChart(element) {
       const dataIndex = Math.floor(xProgress * (smoothedPrices.length - 1))
       const priceValue = smoothedPrices[dataIndex] || 15
 
-      // Log when entering onChart phase
+      // Mark that we've entered chart phase
       if (!window._loggedOnChart) {
-        console.log('[Car Animation] Entered onChart phase, dataToShow.length=', dataToShow.length)
         window._loggedOnChart = true
       }
 
@@ -210,14 +208,7 @@ function driveToChart(element) {
       }
       const smoothY = ySum / yHistory.length
 
-      // Debug logging - detect Y jumps above 3 pixels
-      if (window._lastSmoothY !== undefined) {
-        const yDiff = Math.abs(smoothY - window._lastSmoothY)
-        if (yDiff > 3) {
-          const rawValue = dataToShow[dataIndex]?.value
-          console.log(`[Car Animation] Y JUMP detected! diff=${yDiff.toFixed(2)}, progress=${(xProgress * 100).toFixed(1)}%, idx=${dataIndex}/${dataToShow.length}, raw=${rawValue?.toFixed(4)}, smoothed=${priceValue.toFixed(4)}, effective=${effectivePrice.toFixed(4)}, barTop=${barTopCanvas.toFixed(2)}, prevSmoothY=${window._lastSmoothY.toFixed(2)}, newSmoothY=${smoothY.toFixed(2)}, yHistory.length=${yHistory.length}`)
-        }
-      }
+      // Track smoothY for debugging
       window._lastSmoothY = smoothY
 
       // Calculate rotation based on Y change
@@ -237,14 +228,7 @@ function driveToChart(element) {
       }
       rotation = rotSum / rotationHistory.length
 
-      // Debug logging - detect rotation jumps above 3 degrees (disabled for now)
-      // if (window._lastRotation !== undefined) {
-      //   const rotDiff = Math.abs(rotation - window._lastRotation)
-      //   if (rotDiff > 3) {
-      //     const rawValue = dataToShow[dataIndex]?.value
-      //     console.log(`[Car Animation] ROTATION JUMP detected! diff=${rotDiff.toFixed(2)}°, progress=${(xProgress * 100).toFixed(1)}%, idx=${dataIndex}, prevRot=${window._lastRotation.toFixed(2)}°, newRot=${rotation.toFixed(2)}°`)
-      //   }
-      // }
+      // Track rotation for debugging
       window._lastRotation = rotation
 
       // Convert canvas Y to screen Y
@@ -681,20 +665,18 @@ function setButtonState(button, state) {
 }
 
 // Initialize BMW and Mitsubishi status on load and update every 5 minutes (default, configurable in settings)
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    updateBMWStatus()
-    updateMitsubishiStatus()
-    setInterval(() => {
-      updateBMWStatus()
-      updateMitsubishiStatus()
-    }, (parseInt(localStorage.getItem('carStatusInterval')) || 5) * 60 * 1000)
-  })
-} else {
+function initializeCarStatus() {
   updateBMWStatus()
   updateMitsubishiStatus()
+  const carStatusInterval = (parseInt(localStorage.getItem('carStatusInterval')) || 5) * 60 * 1000
   setInterval(() => {
     updateBMWStatus()
     updateMitsubishiStatus()
-  }, (parseInt(localStorage.getItem('carStatusInterval')) || 5) * 60 * 1000)
+  }, carStatusInterval)
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeCarStatus)
+} else {
+  initializeCarStatus()
 }
