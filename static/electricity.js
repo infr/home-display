@@ -66,19 +66,19 @@ function findOptimalChargingHours(data, hoursNeeded) {
     // Sort windows by average price
     windows.sort((a, b) => a.avg - b.avg)
 
-    // Take bottom 25% of windows
+    // Take bottom 25% of windows to find threshold
     const bottom25Count = Math.max(1, Math.ceil(windows.length * 0.25))
     const bestWindows = windows.slice(0, bottom25Count)
 
-    // Mark all quarters in these windows as optimal
-    const markedIndices = new Set()
-    bestWindows.forEach(window => {
-      window.slice.forEach(quarter => {
-        markedIndices.add(quarter.originalIndex)
-      })
-    })
+    // Calculate threshold: max average of bottom 25% windows
+    const threshold = Math.max(...bestWindows.map(w => w.avg))
 
-    markedIndices.forEach(idx => optimalIndices.push(idx))
+    // Mark any individual quarter below threshold (not just quarters in windows)
+    dayData.forEach(quarter => {
+      if (quarter.value <= threshold + 1) { // +1c tolerance for individual quarters
+        optimalIndices.push(quarter.originalIndex)
+      }
+    })
   })
 
   return optimalIndices
