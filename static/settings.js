@@ -97,6 +97,43 @@ function resetSettings() {
   }
 }
 
+async function killBrowser() {
+  if (confirm('Kill browser process?')) {
+    try {
+      const response = await fetch('/api/kill-browser', { method: 'POST' })
+      const data = await response.json()
+      addDebugLog(`Kill browser: ${data.status}`)
+    } catch (e) {
+      addDebugLog(`Kill browser: ERROR - ${e.message}`)
+    }
+  }
+}
+
+async function redeploy() {
+  if (confirm('Redeploy application? This will restart the server.')) {
+    try {
+      const response = await fetch('/api/redeploy', { method: 'POST' })
+      const data = await response.json()
+      addDebugLog(`Redeploy: ${data.status}`)
+      setTimeout(() => location.reload(), 2000)
+    } catch (e) {
+      addDebugLog(`Redeploy: ERROR - ${e.message}`)
+    }
+  }
+}
+
+async function rebootSystem() {
+  if (confirm('Reboot system? This will restart the entire system.')) {
+    try {
+      const response = await fetch('/api/reboot', { method: 'POST' })
+      const data = await response.json()
+      addDebugLog(`Reboot: ${data.status}`)
+    } catch (e) {
+      addDebugLog(`Reboot: ERROR - ${e.message}`)
+    }
+  }
+}
+
 // Settings management
 function isAutoDarkMode() {
   const now = new Date()

@@ -145,13 +145,18 @@
               </label>
             </div>
             <div class="setting-item">
-              <button onclick="resetSettings()" style="padding: 6px 12px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-color); cursor: pointer; width: 100%; font-size: 11px;">Reset All Settings</button>
+              <button onclick="resetSettings()" class="action-button" style="width: 100%;">Reset All Settings</button>
             </div>
           </div>
           <div class="modal-column logs">
             <div class="setting-item">
               <div id="output" class="log-output"></div>
-              <button onclick="clearDebugLogs()" style="margin-top: 4px; padding: 6px 12px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-color); cursor: pointer; font-size: 11px;">Clear Log</button>
+              <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 4px;">
+                <button onclick="clearDebugLogs()" class="action-button">Clear Log</button>
+                <button onclick="killBrowser()" class="action-button">Kill Browser</button>
+                <button onclick="redeploy()" class="action-button">Redeploy</button>
+                <button onclick="rebootSystem()" class="action-button">Reboot</button>
+              </div>
             </div>
           </div>
         </div>

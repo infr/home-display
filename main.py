@@ -1,4 +1,7 @@
 import subprocess
+import os
+import sys
+import time
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -143,6 +146,38 @@ def mitsubishi_aircon(state: str):
 def mitsubishi_acmode(mode: str, minutes: int):
     result = execute_mitsubishi_command(["phevctl", "acmode", mode, str(minutes)])
     return result
+
+@app.post("/api/reboot")
+def reboot_system():
+    try:
+        subprocess.Popen(["sudo", "systemctl", "reboot"])
+        return {"status": "ok"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail={"status": "failed", "error": str(e)})
+
+@app.post("/api/redeploy")
+def redeploy():
+    try:
+        subprocess.run(["git", "-C", "/home/pi/home-display", "pull", "--rebase"])
+        os.execv(sys.executable, [
+            sys.executable, "-m", "uvicorn", "main:app",
+            "--host", "127.0.0.1", "--port", "8990"
+        ])
+        return {"status": "ok"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail={"status": "failed", "error": str(e)})
+
+@app.post("/api/kill-browser")
+def kill_browser():
+    try:
+        subprocess.run(["pkill", "-TERM", "chromium-browser"])
+        subprocess.run(["pkill", "-TERM", "chromium"])
+        time.sleep(1)
+        subprocess.run(["pkill", "-KILL", "chromium-browser"])
+        subprocess.run(["pkill", "-KILL", "chromium"])
+        return {"status": "ok"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail={"status": "failed", "error": str(e)})
 
 # Mount static files after API routes
 app.mount("/", StaticFiles(directory="static", html=True), name="static")

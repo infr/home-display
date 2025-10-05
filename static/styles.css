@@ -342,6 +342,25 @@ html {
   font-weight: 600;
 }
 
+.action-button {
+  padding: 6px 12px;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 11px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.action-button:hover {
+  opacity: 0.8;
+}
+
+.action-button:active {
+  opacity: 0.6;
+}
+
 .clock {
   font-family: Arial, sans-serif;
   font-size: 22px;
